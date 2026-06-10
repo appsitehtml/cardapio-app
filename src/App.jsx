@@ -6,6 +6,7 @@ import Cart from './pages/Cart'
 import Checkout from './pages/Checkout'
 import MyOrders from './pages/MyOrders'
 import Admin from './pages/Admin'
+import AdminProducts from './pages/AdminProducts'
 import ProtectedRoute from './components/ProtectedRoute'
 
 export default function App() {
@@ -13,6 +14,10 @@ export default function App() {
     <Routes>
       <Route path="/admin-login" element={<AdminLogin />} />
       <Route path="/" element={<Home />} />
+      <Route
+  path="/admin/products"
+  element={<AdminProducts />}
+/>
       <Route path="/checkout" element={<Checkout />} />
       <Route path="/my-orders" element={<MyOrders />} />
       <Route
