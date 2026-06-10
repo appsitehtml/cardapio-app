@@ -29,23 +29,28 @@ export default function AdminProducts() {
 
     if (image) {
 
-      const fileName = `${Date.now()}-${image.name}`
+      const cleanName = image.name.replace(/\s+/g, '-')
 
-      const { error: uploadError } = await supabase
-        .storage
-        .from('products')
-        .upload(fileName, image)
+const fileName = `${Date.now()}-${cleanName}`
+
+      const { data: uploadData, error: uploadError } = await supabase
+  .storage
+  .from('products')
+  .upload(fileName, image)
+
+console.log('UPLOAD DATA:', uploadData)
+console.log('UPLOAD ERROR:', uploadError)
 
       if (!uploadError) {
 
-        const {
-          data: { publicUrl }
-        } = supabase
-          .storage
-          .from('products')
-          .getPublicUrl(fileName)
+        const { data } = supabase
+  .storage
+  .from('products')
+  .getPublicUrl(fileName)
 
-        imageUrl = publicUrl
+console.log(data)
+
+imageUrl = data.publicUrl
       }
     }
 
