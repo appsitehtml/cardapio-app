@@ -10,10 +10,12 @@ export default function AdminProducts() {
   const [description, setDescription] = useState('')
   const [price, setPrice] = useState('')
   const [image, setImage] = useState(null)
+  const [category, setCategory] = useState('Hambúrgueres')
   const [editingProduct, setEditingProduct] = useState(null)
 const [editName, setEditName] = useState('')
 const [editDescription, setEditDescription] = useState('')
 const [editPrice, setEditPrice] = useState('')
+const [editCategory, setEditCategory] = useState('')
 
   async function loadProducts() {
 
@@ -95,18 +97,20 @@ imageUrl = data.publicUrl
     await supabase
       .from('products')
       .insert([
-        {
-          name,
-          description,
-          price,
-          image_url: imageUrl
-        }
-      ])
+  {
+    name,
+    description,
+    price,
+    category,
+    image_url: imageUrl
+  }
+])
 
     setName('')
     setDescription('')
     setPrice('')
     setImage(null)
+    setCategory('Hambúrgueres')
 
     loadProducts()
   }
@@ -117,6 +121,7 @@ imageUrl = data.publicUrl
   setEditName(product.name)
   setEditDescription(product.description)
   setEditPrice(product.price)
+  setEditCategory(product.category || 'Hambúrgueres')
 }
 
 async function saveEdit() {
@@ -124,10 +129,11 @@ async function saveEdit() {
   await supabase
     .from('products')
     .update({
-      name: editName,
-      description: editDescription,
-      price: editPrice
-    })
+  name: editName,
+  description: editDescription,
+  price: editPrice,
+  category: editCategory
+})
     .eq('id', editingProduct.id)
 
   setEditingProduct(null)
@@ -196,6 +202,18 @@ async function deleteProduct(id) {
           className="w-full border p-4 rounded-2xl"
         />
 
+        <select
+  value={category}
+  onChange={(e) => setCategory(e.target.value)}
+  className="w-full border p-4 rounded-2xl"
+>
+  <option>Hambúrgueres</option>
+  <option>Bebidas</option>
+  <option>Porções</option>
+  <option>Sobremesas</option>
+  <option>Combos</option>
+</select>
+
         <input
           type="file"
           onChange={(e) => setImage(e.target.files[0])}
@@ -246,6 +264,18 @@ async function deleteProduct(id) {
       placeholder="Preço"
       className="w-full border p-4 rounded-2xl"
     />
+
+    <select
+  value={editCategory}
+  onChange={(e) => setEditCategory(e.target.value)}
+  className="w-full border p-4 rounded-2xl"
+>
+  <option>Hambúrgueres</option>
+  <option>Bebidas</option>
+  <option>Porções</option>
+  <option>Sobremesas</option>
+  <option>Combos</option>
+</select>
 
     <div className="flex gap-3">
 
