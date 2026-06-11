@@ -10,6 +10,10 @@ export default function AdminProducts() {
   const [description, setDescription] = useState('')
   const [price, setPrice] = useState('')
   const [image, setImage] = useState(null)
+  const [editingProduct, setEditingProduct] = useState(null)
+const [editName, setEditName] = useState('')
+const [editDescription, setEditDescription] = useState('')
+const [editPrice, setEditPrice] = useState('')
 
   async function loadProducts() {
 
@@ -24,6 +28,40 @@ export default function AdminProducts() {
   }
 
   async function createProduct() {
+
+    function startEdit(product) {
+  setEditingProduct(product)
+  setEditName(product.name)
+  setEditDescription(product.description)
+  setEditPrice(product.price)
+}
+
+async function saveEdit() {
+  await supabase
+    .from('products')
+    .update({
+      name: editName,
+      description: editDescription,
+      price: editPrice
+    })
+    .eq('id', editingProduct.id)
+
+  setEditingProduct(null)
+  loadProducts()
+}
+
+async function deleteProduct(id) {
+  const confirmDelete = confirm('Tem certeza que deseja excluir este produto?')
+
+  if (!confirmDelete) return
+
+  await supabase
+    .from('products')
+    .delete()
+    .eq('id', id)
+
+  loadProducts()
+}
 
     let imageUrl = ''
 
@@ -72,6 +110,46 @@ imageUrl = data.publicUrl
 
     loadProducts()
   }
+  function startEdit(product) {
+
+  setEditingProduct(product)
+
+  setEditName(product.name)
+  setEditDescription(product.description)
+  setEditPrice(product.price)
+}
+
+async function saveEdit() {
+
+  await supabase
+    .from('products')
+    .update({
+      name: editName,
+      description: editDescription,
+      price: editPrice
+    })
+    .eq('id', editingProduct.id)
+
+  setEditingProduct(null)
+
+  loadProducts()
+}
+
+async function deleteProduct(id) {
+
+  const confirmDelete = window.confirm(
+    'Tem certeza que deseja excluir este produto?'
+  )
+
+  if (!confirmDelete) return
+
+  await supabase
+    .from('products')
+    .delete()
+    .eq('id', id)
+
+  loadProducts()
+}
 
   useEffect(() => {
     loadProducts()
@@ -139,6 +217,58 @@ imageUrl = data.publicUrl
 
       </div>
 
+      {editingProduct && (
+
+  <div className="bg-white p-6 rounded-3xl shadow-lg mb-8 space-y-4 border-2 border-blue-300">
+
+    <h2 className="text-2xl font-bold">
+      Editando: {editingProduct.name}
+    </h2>
+
+    <input
+      value={editName}
+      onChange={(e) => setEditName(e.target.value)}
+      placeholder="Nome"
+      className="w-full border p-4 rounded-2xl"
+    />
+
+    <input
+      value={editDescription}
+      onChange={(e) => setEditDescription(e.target.value)}
+      placeholder="Descrição"
+      className="w-full border p-4 rounded-2xl"
+    />
+
+    <input
+      type="number"
+      value={editPrice}
+      onChange={(e) => setEditPrice(e.target.value)}
+      placeholder="Preço"
+      className="w-full border p-4 rounded-2xl"
+    />
+
+    <div className="flex gap-3">
+
+      <button
+        onClick={saveEdit}
+        className="flex-1 bg-green-600 text-white py-4 rounded-2xl font-bold"
+      >
+        Salvar Alterações
+      </button>
+
+      <button
+        onClick={() => setEditingProduct(null)}
+        className="flex-1 bg-zinc-300 py-4 rounded-2xl font-bold"
+      >
+        Cancelar
+      </button>
+
+    </div>
+
+  </div>
+
+)}
+
       <div className="grid md:grid-cols-3 gap-6">
 
         {products.map(product => (
@@ -180,6 +310,48 @@ imageUrl = data.publicUrl
               <p className="text-green-600 font-bold text-2xl mt-4">
                 R$ {Number(product.price).toFixed(2)}
               </p>
+
+              <div className="flex gap-2 mt-5">
+
+  <button
+    onClick={() => startEdit(product)}
+    className="
+      flex-1
+      bg-blue-500
+      text-white
+      py-3
+      rounded-2xl
+      font-bold
+      transition-all
+      duration-150
+      hover:bg-blue-600
+      hover:scale-105
+      active:scale-95
+    "
+  >
+    Editar
+  </button>
+
+  <button
+    onClick={() => deleteProduct(product.id)}
+    className="
+      flex-1
+      bg-red-500
+      text-white
+      py-3
+      rounded-2xl
+      font-bold
+      transition-all
+      duration-150
+      hover:bg-red-600
+      hover:scale-105
+      active:scale-95
+    "
+  >
+    Excluir
+  </button>
+
+</div>
 
             </div>
 
