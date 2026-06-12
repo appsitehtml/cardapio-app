@@ -10,12 +10,21 @@ import AdminDashboard from './pages/AdminDashboard'
 import AdminProducts from './pages/AdminProducts'
 import ProtectedRoute from './components/ProtectedRoute'
 import AdminCustomers from './pages/AdminCustomers'
+import AdminMarketing from './pages/AdminMarketing'
 
 export default function App() {
   return (
     <Routes>
       <Route path="/admin-login" element={<AdminLogin />} />
       <Route path="/" element={<Home />} />
+      <Route
+  path="/admin/marketing"
+  element={
+    <ProtectedRoute>
+      <AdminMarketing />
+    </ProtectedRoute>
+  }
+/>
       <Route
   path="/admin/customers"
   element={
