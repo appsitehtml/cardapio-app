@@ -6,14 +6,40 @@ import Cart from './pages/Cart'
 import Checkout from './pages/Checkout'
 import MyOrders from './pages/MyOrders'
 import Admin from './pages/Admin'
+import AdminDashboard from './pages/AdminDashboard'
 import AdminProducts from './pages/AdminProducts'
 import ProtectedRoute from './components/ProtectedRoute'
+import AdminCustomers from './pages/AdminCustomers'
 
 export default function App() {
   return (
     <Routes>
       <Route path="/admin-login" element={<AdminLogin />} />
       <Route path="/" element={<Home />} />
+      <Route
+  path="/admin/customers"
+  element={
+    <ProtectedRoute>
+      <AdminCustomers />
+    </ProtectedRoute>
+  }
+/>
+      <Route
+  path="/admin/orders"
+  element={
+    <ProtectedRoute>
+      <Admin />
+    </ProtectedRoute>
+  }
+/>
+      <Route
+  path="/admin/dashboard"
+  element={
+    <ProtectedRoute>
+      <AdminDashboard />
+    </ProtectedRoute>
+  }
+/>
       <Route
   path="/admin/products"
   element={<AdminProducts />}
@@ -24,7 +50,7 @@ export default function App() {
   path="/admin"
   element={
     <ProtectedRoute>
-      <Admin />
+      <AdminDashboard />
     </ProtectedRoute>
   }
 />

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import AdminLayout from '../components/AdminLayout'
 
 import { supabase } from '../lib/supabase'
 
@@ -163,7 +164,7 @@ async function deleteProduct(id) {
 
   return (
 
-    <div className="min-h-screen bg-zinc-100 p-6">
+  <AdminLayout>
 
       <h1 className="text-4xl font-bold mb-8">
         Produtos 🍔
@@ -391,6 +392,6 @@ async function deleteProduct(id) {
 
       </div>
 
-    </div>
-  )
+    </AdminLayout>
+)
 }
