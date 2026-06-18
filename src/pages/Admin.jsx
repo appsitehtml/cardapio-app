@@ -29,6 +29,79 @@ const [statusFilter, setStatusFilter] = useState('todos')
     loadOrders()
   }
 
+  function getTier(levelPoints) {
+  if (levelPoints >= 1500) return 'diamante'
+  if (levelPoints >= 800) return 'ouro'
+  if (levelPoints >= 300) return 'prata'
+
+  return 'bronze'
+}
+
+ async function addLoyaltyPoints(order) {
+  if (!order.phone) return
+
+  const pointsToAdd = Number(order.total_amount || 0)
+
+  if (pointsToAdd <= 0) return
+
+  const { data: existingCard } = await supabase
+    .from('loyalty_cards')
+    .select('*')
+    .eq('customer_phone', order.phone)
+    .maybeSingle()
+
+  if (existingCard) {
+    const newRedeemPoints =
+      Number(existingCard.redeem_points || existingCard.points || 0) + pointsToAdd
+
+    const newLevelPoints =
+      Number(existingCard.level_points || existingCard.points || 0) + pointsToAdd
+
+    await supabase
+      .from('loyalty_cards')
+      .update({
+        customer_name: order.customer_name,
+        points: newRedeemPoints,
+        redeem_points: newRedeemPoints,
+        level_points: newLevelPoints,
+        tier: getTier(newLevelPoints),
+        total_orders: Number(existingCard.total_orders || 0) + 1,
+        total_spent: Number(existingCard.total_spent || 0) + Number(order.total_amount || 0)
+      })
+      .eq('customer_phone', order.phone)
+  } else {
+    await supabase
+      .from('loyalty_cards')
+      .insert([
+        {
+          customer_phone: order.phone,
+          customer_name: order.customer_name,
+          points: pointsToAdd,
+          redeem_points: pointsToAdd,
+          level_points: pointsToAdd,
+          tier: getTier(pointsToAdd),
+          total_orders: 1,
+          total_spent: Number(order.total_amount || 0)
+        }
+      ])
+  }
+
+  await supabase
+    .from('loyalty_transactions')
+    .insert([
+      {
+        customer_phone: order.phone,
+        customer_name: order.customer_name,
+        type: 'earn',
+        points: pointsToAdd,
+        level_points: pointsToAdd,
+        description: `Pontos ganhos no pedido #${order.id}`,
+        order_id: String(order.id),
+        order_amount: Number(order.total_amount || 0)
+      }
+    ])
+}
+
   async function advanceStatus(order) {
     const flow = {
       recebido: 'preparando',
@@ -37,10 +110,16 @@ const [statusFilter, setStatusFilter] = useState('todos')
       finalizado: 'finalizado'
     }
 
-    await supabase
-      .from('orders')
-      .update({ status: flow[order.status] || 'recebido' })
-      .eq('id', order.id)
+    const nextStatus = flow[order.status] || 'recebido'
+
+await supabase
+  .from('orders')
+  .update({ status: nextStatus })
+  .eq('id', order.id)
+
+if (nextStatus === 'finalizado' && order.status !== 'finalizado') {
+  await addLoyaltyPoints(order)
+}
 
     loadOrders()
   }
@@ -221,6 +300,11 @@ const visibleOrders = baseOrders.filter(order => {
 
                   <p className="text-xs text-zinc-500">
   Pagamento: {paymentLabel(order.payment_method)}
+  {order.loyalty_reward_name && (
+  <p className="text-xs text-purple-700 font-bold mt-1">
+    🎁 Recompensa: {order.loyalty_reward_name}
+  </p>
+)}
   {order.payment_method === 'dinheiro' && order.change_for
     ? ` · Troco para R$ ${order.change_for}`
     : ''}
@@ -344,6 +428,38 @@ const visibleOrders = baseOrders.filter(order => {
                     ))}
                   </div>
                 </div>
+
+                {selectedOrder.loyalty_reward_name && (
+  <div className="bg-purple-50 border border-purple-300 rounded-2xl p-3">
+    <p className="text-xs text-purple-700">
+      Recompensa de Fidelidade
+    </p>
+
+    <p className="font-bold text-purple-800">
+      {selectedOrder.loyalty_reward_name}
+    </p>
+
+    <p className="text-sm text-purple-700 mt-1">
+      Pontos usados: {Number(selectedOrder.loyalty_points_used || 0).toFixed(2)}
+    </p>
+  </div>
+)}
+
+                {selectedOrder.coupon_code && (
+  <div className="bg-green-50 border border-green-300 rounded-2xl p-3">
+    <p className="text-xs text-green-700">
+      Cupom utilizado
+    </p>
+
+    <p className="font-bold text-green-800">
+      {selectedOrder.coupon_code}
+    </p>
+
+    <p className="text-sm text-green-700 mt-1">
+      Desconto: -R$ {Number(selectedOrder.discount_amount || 0).toFixed(2)}
+    </p>
+  </div>
+)}
 
                 <div className="bg-white border rounded-2xl p-3 flex justify-between font-black text-lg">
                   <span>Total</span>

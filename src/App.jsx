@@ -11,12 +11,18 @@ import AdminProducts from './pages/AdminProducts'
 import ProtectedRoute from './components/ProtectedRoute'
 import AdminCustomers from './pages/AdminCustomers'
 import AdminMarketing from './pages/AdminMarketing'
+import Loyalty from './pages/Loyalty'
+import Profile from './pages/Profile'
+import AdminLoyalty from './pages/AdminLoyalty'
 
 export default function App() {
   return (
     <Routes>
       <Route path="/admin-login" element={<AdminLogin />} />
       <Route path="/" element={<Home />} />
+      <Route path="/loyalty" element={<Loyalty />} />
+      <Route path="/profile" element={<Profile />} />
+      <Route path="/admin/loyalty" element={<AdminLoyalty />} />
       <Route
   path="/admin/marketing"
   element={

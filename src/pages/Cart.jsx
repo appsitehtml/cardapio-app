@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 
@@ -20,24 +20,30 @@ import {
 const WHATSAPP_NUMBER = '5511999910621'
 
 export default function Cart() {
-  const {
-    cart,
-    total,
-    removeFromCart,
-    clearCart
-  } = useCart()
+ const {
+  cart,
+  total,
+  addToCart,
+  removeFromCart,
+  clearCart
+} = useCart()
 
   const navigate = useNavigate()
 
-  const [name, setName] = useState('')
-  const [phone, setPhone] = useState('')
-  const [address, setAddress] = useState('')
+  const [name, setName] = useState(localStorage.getItem('customer_name') || '')
+const [phone, setPhone] = useState(localStorage.getItem('customer_phone') || '')
+const [address, setAddress] = useState(localStorage.getItem('customer_address') || '')
   const [notes, setNotes] = useState('')
   const [paymentMethod, setPaymentMethod] = useState('pix')
   const [changeFor, setChangeFor] = useState('')
   const [couponCode, setCouponCode] = useState('')
 const [appliedCoupon, setAppliedCoupon] = useState(null)
 const [discountAmount, setDiscountAmount] = useState(0)
+const [availableRewards, setAvailableRewards] = useState([])
+const [selectedReward, setSelectedReward] = useState(null)
+useEffect(() => {
+  loadRewards()
+}, [phone])
 
   function paymentLabel(method) {
     if (method === 'pix') return 'PIX'
@@ -87,6 +93,51 @@ const [discountAmount, setDiscountAmount] = useState(0)
 
 const finalTotal = total - discountAmount
 
+async function loadRewards() {
+  if (!phone) return
+
+  const { data: card } = await supabase
+    .from('loyalty_cards')
+    .select('*')
+    .eq('customer_phone', phone)
+    .maybeSingle()
+
+  if (!card) {
+    setAvailableRewards([])
+    return
+  }
+
+  const currentPoints =
+    Number(card.redeem_points || card.points || 0)
+
+  const tier = card.tier || 'bronze'
+
+  const tierOrder = {
+    bronze: 1,
+    prata: 2,
+    ouro: 3,
+    diamante: 4
+  }
+
+  const { data: rewards } = await supabase
+    .from('loyalty_rewards')
+    .select('*')
+    .eq('active', true)
+
+  const available =
+    (rewards || []).filter(reward => {
+      const requiredTier =
+        reward.tier_required || 'bronze'
+
+      return (
+        tierOrder[requiredTier] <= tierOrder[tier] &&
+        currentPoints >= Number(reward.points_required)
+      )
+    })
+
+  setAvailableRewards(available)
+}
+
   async function finishOrder(openWhatsApp = false) {
     if (cart.length === 0) {
   toast.error('Seu carrinho está vazio')
@@ -112,16 +163,20 @@ if (!address.trim()) {
       .from('orders')
       .insert([
         {
-          customer_name: name,
-          phone,
-          address,
-          notes,
-          payment_method: paymentMethod,
-          change_for: changeFor,
-          status: 'recebido',
-          total_amount: finalTotal,
-          items: cart
-        }
+  customer_name: name,
+  phone,
+  address,
+  notes,
+  payment_method: paymentMethod,
+  change_for: changeFor,
+  coupon_code: appliedCoupon?.code || null,
+  discount_amount: discountAmount,
+  status: 'recebido',
+ total_amount: finalTotal,
+loyalty_reward_name: selectedReward?.name || null,
+loyalty_points_used: selectedReward ? Number(selectedReward.points_required || 0) : 0,
+items: cart
+}
       ])
       .select()
       .single()
@@ -131,7 +186,49 @@ if (!address.trim()) {
       return
     }
 
+    
+    if (selectedReward) {
+  const { data: loyaltyCard } = await supabase
+    .from('loyalty_cards')
+    .select('*')
+    .eq('customer_phone', phone)
+    .maybeSingle()
+
+  if (loyaltyCard) {
+    const currentPoints = Number(loyaltyCard.redeem_points || loyaltyCard.points || 0)
+    const pointsUsed = Number(selectedReward.points_required || 0)
+    const newPoints = Math.max(currentPoints - pointsUsed, 0)
+
+    await supabase
+  .from('loyalty_cards')
+  .update({
+    points: newPoints,
+    redeem_points: newPoints,
+    rewards_redeemed: Number(loyaltyCard.rewards_redeemed || 0) + 1
+  })
+  .eq('customer_phone', phone)
+
+    await supabase
+      .from('loyalty_transactions')
+      .insert([
+        {
+          customer_phone: phone,
+          customer_name: name,
+          type: 'redeem',
+          points: -pointsUsed,
+          level_points: 0,
+          description: `Resgate de ${selectedReward.name}`,
+          reward_name: selectedReward.name
+        }
+      ])
+  }
+}
+
     toast.success('Pedido enviado com sucesso!')
+
+    localStorage.setItem('customer_phone', phone)
+localStorage.setItem('customer_name', name)
+localStorage.setItem('customer_address', address)
 
     if (openWhatsApp) {
       const itemsText = cart
@@ -153,6 +250,10 @@ if (!address.trim()) {
       }
 
       message += `\n\n*Itens:*\n${itemsText}`
+      if (selectedReward) {
+  message += `\n\n*Recompensa de Fidelidade:* ${selectedReward.name}`
+  message += `\n*Pontos usados:* ${Number(selectedReward.points_required || 0).toFixed(2)} pts`
+}
       message += `\n\n*Pagamento:* ${paymentLabel(paymentMethod)}`
 
       if (paymentMethod === 'dinheiro' && changeFor) {
@@ -201,17 +302,23 @@ message += `\n\n*Total:* R$ ${finalTotal.toFixed(2)}`
             Pedidos
           </Link>
 
-          <button className="flex items-center gap-2 hover:text-amber-900">
-            <Star className="w-4 h-4" />
-            Fidelidade
-          </button>
+          <Link
+  to="/loyalty"
+  className="flex items-center gap-2 hover:text-amber-900"
+>
+  <Star className="w-4 h-4" />
+  Fidelidade
+</Link>
 
-          <button className="flex items-center gap-2 hover:text-amber-900">
-            <User className="w-4 h-4" />
-            Perfil
-          </button>
+          <Link
+  to="/profile"
+  className="flex items-center gap-2 hover:text-amber-900"
+>
+  <User className="w-4 h-4" />
+  Perfil
+</Link>
 
-        </nav>
+</nav>
 
       </div>
     </header>
@@ -268,10 +375,11 @@ message += `\n\n*Total:* R$ ${finalTotal.toFixed(2)}`
                 </span>
 
                 <button
-                  className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-zinc-100"
-                >
-                  <Plus className="w-4 h-4" />
-                </button>
+  onClick={() => addToCart(item)}
+  className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-zinc-100"
+>
+  <Plus className="w-4 h-4" />
+</button>
 
                 <p className="font-black w-20 text-right">
                   R$ {(item.price * item.quantity).toFixed(2)}
@@ -309,6 +417,56 @@ message += `\n\n*Total:* R$ ${finalTotal.toFixed(2)}`
               Cupom {appliedCoupon.code} aplicado: -R$ {discountAmount.toFixed(2)}
             </p>
           )}
+
+          {availableRewards.length > 0 && (
+  <div className="border-t mt-4 pt-4">
+
+    <p className="text-sm font-bold text-purple-700 mb-3">
+      🎁 Adicionar recompensa de fidelidade grátis
+    </p>
+
+    <div className="space-y-2">
+      {availableRewards.map(reward => (
+        <button
+          key={reward.id}
+          type="button"
+          onClick={() =>
+            selectedReward?.id === reward.id
+              ? setSelectedReward(null)
+              : setSelectedReward(reward)
+          }
+          className={`
+            w-full
+            flex
+            items-center
+            justify-between
+            border
+            rounded-xl
+            px-4
+            py-3
+            text-left
+            transition-all
+            ${
+              selectedReward?.id === reward.id
+                ? 'border-purple-500 bg-purple-50'
+                : 'border-zinc-200 bg-white hover:bg-zinc-50'
+            }
+          `}
+        >
+          <span className="font-bold">
+            {reward.name}
+          </span>
+
+          <span className="text-sm font-bold text-zinc-500">
+            {reward.points_required} pts
+          </span>
+        </button>
+      ))}
+    </div>
+
+  </div>
+)}
+          
 
         </div>
 
