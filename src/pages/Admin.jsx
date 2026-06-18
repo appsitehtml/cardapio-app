@@ -5,6 +5,8 @@ import toast from 'react-hot-toast'
 import { supabase } from '../lib/supabase'
 import AdminLayout from '../components/AdminLayout'
 
+let notificationAudio = null
+
 export default function Admin() {
   const [orders, setOrders] = useState([])
   const [tab, setTab] = useState('active')
@@ -16,14 +18,20 @@ const [soundEnabled, setSoundEnabled] = useState(
 )
 
 function enableSound() {
-  const audio = new Audio('/notification.mp3')
+  notificationAudio = new Audio('/notification.mp3')
+  notificationAudio.volume = 1
 
-  audio.play().then(() => {
+  notificationAudio.play().then(() => {
+    notificationAudio.pause()
+    notificationAudio.currentTime = 0
+
     localStorage.setItem('admin_sound_enabled', 'true')
     setSoundEnabled(true)
+
     toast.success('Som ativado')
-  }).catch(() => {
-    toast.error('Não foi possível ativar o som')
+  }).catch((error) => {
+    console.log('ERRO AO ATIVAR SOM:', error)
+    toast.error('Clique novamente para ativar o som')
   })
 }
 
@@ -158,11 +166,14 @@ function playNotificationSound() {
 
   if (!enabled) return
 
-  const audio = new Audio('/notification.mp3')
-  audio.volume = 1
-  audio.currentTime = 0
+  if (!notificationAudio) {
+    notificationAudio = new Audio('/notification.mp3')
+    notificationAudio.volume = 1
+  }
 
-  audio.play().catch((error) => {
+  notificationAudio.currentTime = 0
+
+  notificationAudio.play().catch((error) => {
     console.log('ERRO AO TOCAR SOM:', error)
   })
 }
