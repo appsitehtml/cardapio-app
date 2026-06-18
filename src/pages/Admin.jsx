@@ -154,10 +154,13 @@ if (nextStatus === 'finalizado' && order.status !== 'finalizado') {
   }
 
 function playNotificationSound() {
-  if (!soundEnabled) return
+  const enabled = localStorage.getItem('admin_sound_enabled') === 'true'
+
+  if (!enabled) return
 
   const audio = new Audio('/notification.mp3')
   audio.volume = 1
+  audio.currentTime = 0
 
   audio.play().catch((error) => {
     console.log('ERRO AO TOCAR SOM:', error)
