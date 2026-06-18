@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Eye, CheckCircle, XCircle, Printer, Wifi } from 'lucide-react'
+import toast from 'react-hot-toast'
 
 import { supabase } from '../lib/supabase'
 import AdminLayout from '../components/AdminLayout'
@@ -10,6 +11,21 @@ export default function Admin() {
   const [selectedOrder, setSelectedOrder] = useState(null)
   const [search, setSearch] = useState('')
 const [statusFilter, setStatusFilter] = useState('todos')
+const [soundEnabled, setSoundEnabled] = useState(
+  localStorage.getItem('admin_sound_enabled') === 'true'
+)
+
+function enableSound() {
+  const audio = new Audio('/notification.mp3')
+
+  audio.play().then(() => {
+    localStorage.setItem('admin_sound_enabled', 'true')
+    setSoundEnabled(true)
+    toast.success('Som ativado')
+  }).catch(() => {
+    toast.error('Não foi possível ativar o som')
+  })
+}
 
   async function loadOrders() {
     const { data } = await supabase
@@ -137,25 +153,44 @@ if (nextStatus === 'finalizado' && order.status !== 'finalizado') {
     loadOrders()
   }
 
+function playNotificationSound() {
+  if (!soundEnabled) return
+
+  const audio = new Audio('/notification.mp3')
+  audio.volume = 1
+
+  audio.play().catch((error) => {
+    console.log('ERRO AO TOCAR SOM:', error)
+  })
+}
+
   useEffect(() => {
     loadOrders()
 
     const channel = supabase
-      .channel('admin-orders')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'orders'
-        },
-        loadOrders
-      )
-      .subscribe()
+  .channel('admin-orders')
+  .on(
+    'postgres_changes',
+    {
+      event: '*',
+      schema: 'public',
+      table: 'orders'
+    },
+    (payload) => {
+      loadOrders()
 
-    return () => {
-      supabase.removeChannel(channel)
+      if (payload.eventType === 'INSERT') {
+        toast.success('🔔 Novo pedido recebido!')
+
+        playNotificationSound()
+      }
     }
+  )
+  .subscribe()
+
+return () => {
+  supabase.removeChannel(channel)
+}
   }, [])
 
   const activeOrders = orders.filter(order =>
@@ -217,6 +252,20 @@ const visibleOrders = baseOrders.filter(order => {
               Gerencie os pedidos da sua loja
             </p>
           </div>
+
+          <button
+  onClick={enableSound}
+  className={`
+    flex items-center gap-2 border px-4 py-2 rounded-full text-sm font-bold
+    ${
+      soundEnabled
+        ? 'bg-green-50 text-green-700 border-green-200'
+        : 'bg-white text-zinc-600 border-zinc-200'
+    }
+  `}
+>
+  🔊 {soundEnabled ? 'Som ativo' : 'Ativar som'}
+</button>
 
           <div className="flex items-center gap-2 bg-green-50 text-green-700 border border-green-200 px-4 py-2 rounded-full text-sm font-bold">
             <Wifi className="w-4 h-4" />
@@ -300,15 +349,16 @@ const visibleOrders = baseOrders.filter(order => {
 
                   <p className="text-xs text-zinc-500">
   Pagamento: {paymentLabel(order.payment_method)}
-  {order.loyalty_reward_name && (
-  <p className="text-xs text-purple-700 font-bold mt-1">
-    🎁 Recompensa: {order.loyalty_reward_name}
-  </p>
-)}
   {order.payment_method === 'dinheiro' && order.change_for
     ? ` · Troco para R$ ${order.change_for}`
     : ''}
 </p>
+
+{order.loyalty_reward_name && (
+  <p className="text-xs text-purple-700 font-bold mt-1">
+    🎁 Recompensa: {order.loyalty_reward_name}
+  </p>
+)}
                 </div>
 
                 <div className={`h-fit px-3 py-1 rounded-full border text-xs font-bold ${statusClass(order.status)}`}>

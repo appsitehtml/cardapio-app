@@ -400,12 +400,12 @@ message += `\n\n*Total:* R$ ${finalTotal.toFixed(2)}`
               value={couponCode}
               onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
               placeholder="Cupom de desconto"
-              className="flex-1 border rounded-xl p-3 text-sm"
+              className="flex-1 border border-zinc-200 rounded-xl p-3 text-sm shadow-sm"
             />
 
             <button
               onClick={applyCoupon}
-              className="border px-4 rounded-xl font-bold hover:bg-zinc-100"
+              className="border border-zinc-200 px-4 rounded-xl font-bold hover:bg-zinc-100 shadow-sm"
             >
               Aplicar
             </button>
@@ -421,48 +421,79 @@ message += `\n\n*Total:* R$ ${finalTotal.toFixed(2)}`
           {availableRewards.length > 0 && (
   <div className="border-t mt-4 pt-4">
 
-    <p className="text-sm font-bold text-purple-700 mb-3">
-      🎁 Adicionar recompensa de fidelidade grátis
-    </p>
+    {!selectedReward ? (
+      <>
+        <p className="text-sm font-bold text-purple-700 mb-3">
+          🎁 Adicionar recompensa de fidelidade grátis
+        </p>
 
-    <div className="space-y-2">
-      {availableRewards.map(reward => (
-        <button
-          key={reward.id}
-          type="button"
-          onClick={() =>
-            selectedReward?.id === reward.id
-              ? setSelectedReward(null)
-              : setSelectedReward(reward)
-          }
-          className={`
-            w-full
-            flex
-            items-center
-            justify-between
-            border
-            rounded-xl
-            px-4
-            py-3
-            text-left
-            transition-all
-            ${
-              selectedReward?.id === reward.id
-                ? 'border-purple-500 bg-purple-50'
-                : 'border-zinc-200 bg-white hover:bg-zinc-50'
-            }
-          `}
-        >
-          <span className="font-bold">
-            {reward.name}
+        <div className="space-y-2">
+          {availableRewards.map(reward => (
+            <button
+              key={reward.id}
+              type="button"
+              onClick={() => setSelectedReward(reward)}
+              className="
+                w-full
+                flex
+                items-center
+                justify-between
+                border
+                border-zinc-200
+                rounded-xl
+                px-4
+                py-3
+                text-left
+                bg-white
+                hover:bg-purple-50
+                hover:border-purple-300
+                transition-all
+              "
+            >
+              <span className="font-bold">
+                {reward.name}
+              </span>
+
+              <span className="text-sm font-bold text-zinc-500">
+                {reward.points_required} pts
+              </span>
+            </button>
+          ))}
+        </div>
+      </>
+    ) : (
+      <div className="bg-purple-50 border border-purple-100 rounded-2xl p-4">
+
+        <p className="text-xs font-bold text-purple-700 uppercase">
+          🎁 Recompensa selecionada
+        </p>
+
+        <h3 className="text-lg font-black mt-2">
+          {selectedReward.name}
+        </h3>
+
+        <p className="text-sm text-purple-700 mt-1">
+          Será adicionada gratuitamente ao seu pedido.
+        </p>
+
+        <div className="mt-3 flex items-center justify-between">
+
+          <span className="font-bold text-purple-800">
+            {selectedReward.points_required} pts
           </span>
 
-          <span className="text-sm font-bold text-zinc-500">
-            {reward.points_required} pts
-          </span>
-        </button>
-      ))}
-    </div>
+          <button
+            type="button"
+            onClick={() => setSelectedReward(null)}
+            className="text-sm font-bold text-purple-700"
+          >
+            Trocar
+          </button>
+
+        </div>
+
+      </div>
+    )}
 
   </div>
 )}
@@ -508,7 +539,7 @@ message += `\n\n*Total:* R$ ${finalTotal.toFixed(2)}`
             placeholder="Nome"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full border rounded-xl p-3"
+            className="w-full border border-zinc-200 rounded-xl p-3 shadow-sm"
           />
 
           <input
@@ -516,7 +547,7 @@ message += `\n\n*Total:* R$ ${finalTotal.toFixed(2)}`
             placeholder="Telefone"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            className="w-full border rounded-xl p-3"
+            className="w-full border border-zinc-200 rounded-xl p-3 shadow-sm"
           />
 
           <input
@@ -524,14 +555,14 @@ message += `\n\n*Total:* R$ ${finalTotal.toFixed(2)}`
             placeholder="Endereço"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
-            className="w-full border rounded-xl p-3"
+            className="w-full border border-zinc-200 rounded-xl p-3 shadow-sm"
           />
 
           <textarea
             placeholder="Observações do pedido. Ex: sem cebola, molho à parte..."
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            className="w-full border rounded-xl p-3 min-h-24"
+            className="w-full border border-zinc-200 rounded-xl p-3 shadow-sm min-h-24"
           />
 
         </div>
