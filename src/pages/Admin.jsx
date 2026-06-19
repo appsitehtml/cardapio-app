@@ -254,17 +254,7 @@ function playNotificationSound() {
   }
 }, [])
 
-  const activeOrders = orders.filter(order =>
-    ['recebido', 'preparando', 'entrega'].includes(order.status)
-  )
-
-  const finishedOrders = orders.filter(order =>
-    ['finalizado', 'cancelado'].includes(order.status)
-  )
-
-  const baseOrders = tab === 'active' ? activeOrders : finishedOrders
-
-const visibleOrders = baseOrders.filter(order => {
+  const filteredOrders = orders.filter(order => {
   const matchesSearch =
     order.customer_name?.toLowerCase().includes(search.toLowerCase()) ||
     order.phone?.toLowerCase().includes(search.toLowerCase()) ||
@@ -275,6 +265,22 @@ const visibleOrders = baseOrders.filter(order => {
 
   return matchesSearch && matchesStatus
 })
+
+const activeOrders = filteredOrders
+  .filter(order => ['recebido', 'preparando', 'entrega'].includes(order.status))
+  .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+
+const finishedOrders = filteredOrders
+  .filter(order => ['finalizado', 'cancelado'].includes(order.status))
+  .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+
+const baseOrders = tab === 'active' ? activeOrders : finishedOrders
+
+const visibleOrders = baseOrders
+
+const todayRevenue = orders
+  .filter(order => order.status === 'finalizado')
+  .reduce((sum, order) => sum + Number(order.total_amount || 0), 0)
 
   function statusLabel(status) {
     if (status === 'recebido') return 'Recebido'
@@ -450,12 +456,12 @@ const visibleOrders = baseOrders.filter(order => {
 
   <div className="bg-white border border-zinc-200 rounded-2xl p-4 shadow-sm">
     <p className="text-xs text-zinc-500 font-bold uppercase">
-      Hoje
-    </p>
+  Faturamento
+</p>
 
-    <p className="text-2xl font-black text-amber-900 mt-1">
-      {orders.length}
-    </p>
+<p className="text-2xl font-black text-green-700 mt-1">
+  R$ {todayRevenue.toFixed(2)}
+</p>
   </div>
 
 </div>
@@ -817,12 +823,14 @@ const visibleOrders = baseOrders.filter(order => {
                     Imprimir
                   </button>
 
-                  <button
-                    onClick={() => advanceStatus(selectedOrder)}
-                    className="flex-1 bg-amber-900 text-white py-2 rounded-xl font-bold text-xs sm:text-sm"
-                  >
-                    Avançar Status
-                  </button>
+                  {!['finalizado', 'cancelado'].includes(selectedOrder.status) && (
+  <button
+    onClick={() => advanceStatus(selectedOrder)}
+    className="flex-1 bg-amber-900 text-white py-2 rounded-xl font-bold text-xs sm:text-sm"
+  >
+    Avançar Status
+  </button>
+)}
 
                   <button
                     onClick={() => cancelOrder(selectedOrder)}

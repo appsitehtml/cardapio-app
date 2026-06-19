@@ -54,7 +54,14 @@ export default function AdminDashboard() {
     0
   )
 
-  const today = new Date().toISOString().slice(0, 10)
+  const today = new Date().toISOString().split('T')[0]
+
+const todayRevenue = orders
+  .filter(order =>
+    order.status === 'finalizado' &&
+    order.created_at?.startsWith(today)
+  )
+  .reduce((sum, order) => sum + Number(order.total_amount || 0), 0)
 
   const todayOrders = orders.filter(order =>
     order.created_at?.slice(0, 10) === today
@@ -69,6 +76,14 @@ export default function AdminDashboard() {
       color: 'text-green-600',
       bg: 'bg-green-100'
     },
+    {
+  title: 'Receita Hoje',
+  value: `R$ ${todayRevenue.toFixed(2)}`,
+  helper: `${todayOrders.length} pedidos hoje`,
+  icon: DollarSign,
+  color: 'text-green-700',
+  bg: 'bg-green-100'
+},
     {
       title: 'Pedidos Hoje',
       value: todayOrders.length,
@@ -109,7 +124,7 @@ export default function AdminDashboard() {
           </p>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-4 mb-8">
+        <div className="grid gap-4 md:grid-cols-5 mb-8">
           {cards.map(card => {
             const Icon = card.icon
 
