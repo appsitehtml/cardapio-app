@@ -39,6 +39,21 @@ function enableSound() {
   })
 }
 
+function enableBrowserNotifications() {
+  if (!('Notification' in window)) {
+    toast.error('Seu navegador não suporta notificações')
+    return
+  }
+
+  Notification.requestPermission().then(permission => {
+    if (permission === 'granted') {
+      toast.success('Notificações ativadas')
+    } else {
+      toast.error('Notificações bloqueadas')
+    }
+  })
+}
+
 function getStatusColor(status) {
   switch (status) {
     case 'recebido':
@@ -194,8 +209,8 @@ function playNotificationSound() {
   const enabled = localStorage.getItem('admin_sound_enabled') === 'true'
   if (!enabled) return
 
-  if (navigator.vibrate) {
-  navigator.vibrate([500, 150, 500])
+ if (navigator.vibrate) {
+  navigator.vibrate([700, 200, 700, 200, 700])
 }
 
   if (!notificationAudio) {
@@ -231,9 +246,18 @@ function playNotificationSound() {
         loadOrders()
 
         if (payload.eventType === 'INSERT') {
-          toast.success('🔔 Novo pedido recebido!')
-          playNotificationSound()
-        }
+  const order = payload.new
+
+  toast.success('🔔 Novo pedido recebido!')
+  playNotificationSound()
+
+  if ('Notification' in window && Notification.permission === 'granted') {
+    new Notification('🔔 Novo pedido recebido!', {
+      body: `${order.customer_name || 'Cliente'} · R$ ${Number(order.total_amount || 0).toFixed(2)}`,
+      icon: '/vite.svg'
+    })
+  }
+}
       }
     )
     .subscribe()
@@ -462,6 +486,13 @@ const visibleOrders = baseOrders.filter(order => {
   `}
 >
   🔊 {soundEnabled ? 'Som ativo' : 'Ativar som'}
+</button>
+
+<button
+  onClick={enableBrowserNotifications}
+  className="flex items-center gap-2 border px-4 py-2 rounded-full text-sm font-bold bg-white text-zinc-600 border-zinc-200"
+>
+  🔔 Ativar notificações
 </button>
 
           <div className="flex flex-wrap gap-2">
