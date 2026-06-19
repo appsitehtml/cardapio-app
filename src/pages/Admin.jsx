@@ -16,6 +16,7 @@ const [statusFilter, setStatusFilter] = useState('todos')
 const [soundEnabled, setSoundEnabled] = useState(
   localStorage.getItem('admin_sound_enabled') === 'true'
 )
+const [now, setNow] = useState(new Date())
 
 function enableSound() {
   notificationAudio = new Audio('/notification.mp3')
@@ -33,6 +34,25 @@ function enableSound() {
     console.log('ERRO AO ATIVAR SOM:', error)
     toast.error('Clique novamente para ativar o som')
   })
+}
+
+function getStatusColor(status) {
+  switch (status) {
+    case 'recebido':
+      return 'bg-blue-100 text-blue-700 border-blue-300'
+
+    case 'preparando':
+      return 'bg-yellow-100 text-yellow-700 border-yellow-300'
+
+    case 'entrega':
+      return 'bg-purple-100 text-purple-700 border-purple-300'
+
+    case 'finalizado':
+      return 'bg-green-100 text-green-700 border-green-300'
+
+    default:
+      return 'bg-zinc-100 text-zinc-700 border-zinc-300'
+  }
 }
 
   async function loadOrders() {
@@ -140,6 +160,12 @@ await supabase
   .from('orders')
   .update({ status: nextStatus })
   .eq('id', order.id)
+  if (selectedOrder?.id === order.id) {
+  setSelectedOrder({
+    ...selectedOrder,
+    status: nextStatus
+  })
+}
 
 if (nextStatus === 'finalizado' && order.status !== 'finalizado') {
   await addLoyaltyPoints(order)
@@ -179,33 +205,37 @@ function playNotificationSound() {
 }
 
   useEffect(() => {
-    loadOrders()
+  loadOrders()
 
-    const channel = supabase
-  .channel('admin-orders')
-  .on(
-    'postgres_changes',
-    {
-      event: '*',
-      schema: 'public',
-      table: 'orders'
-    },
-    (payload) => {
-      loadOrders()
+  const timer = setInterval(() => {
+    setNow(new Date())
+  }, 60000)
 
-      if (payload.eventType === 'INSERT') {
-        toast.success('🔔 Novo pedido recebido!')
+  const channel = supabase
+    .channel('admin-orders')
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'orders'
+      },
+      (payload) => {
+        loadOrders()
 
-        playNotificationSound()
+        if (payload.eventType === 'INSERT') {
+          toast.success('🔔 Novo pedido recebido!')
+          playNotificationSound()
+        }
       }
-    }
-  )
-  .subscribe()
+    )
+    .subscribe()
 
-return () => {
-  supabase.removeChannel(channel)
-}
-  }, [])
+  return () => {
+    clearInterval(timer)
+    supabase.removeChannel(channel)
+  }
+}, [])
 
   const activeOrders = orders.filter(order =>
     ['recebido', 'preparando', 'entrega'].includes(order.status)
@@ -255,6 +285,96 @@ const visibleOrders = baseOrders.filter(order => {
     return 'bg-zinc-100 text-zinc-700 border-zinc-200'
   }
 
+  function printOrder(order) {
+  const itemsText = order.items
+    ?.map(item => `${item.quantity}x ${item.name} - R$ ${(item.price * item.quantity).toFixed(2)}`)
+    .join('<br />') || ''
+
+  const printWindow = window.open('', '_blank')
+
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>Pedido #${order.id}</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            padding: 24px;
+            color: #111;
+          }
+
+          h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+          }
+
+          .section {
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 1px solid #ddd;
+          }
+
+          .total {
+            font-size: 22px;
+            font-weight: bold;
+            margin-top: 16px;
+          }
+        </style>
+      </head>
+
+      <body>
+        <h1>Pedido #${order.id}</h1>
+
+        <p><strong>Cliente:</strong> ${order.customer_name || ''}</p>
+        <p><strong>Telefone:</strong> ${order.phone || ''}</p>
+        <p><strong>Endereço:</strong> ${order.address || ''}</p>
+
+        <div class="section">
+          <strong>Itens:</strong><br />
+          ${itemsText}
+        </div>
+
+        ${order.notes ? `
+          <div class="section">
+            <strong>Observações:</strong><br />
+            ${order.notes}
+          </div>
+        ` : ''}
+
+        ${order.loyalty_reward_name ? `
+          <div class="section">
+            <strong>Recompensa:</strong><br />
+            ${order.loyalty_reward_name}
+          </div>
+        ` : ''}
+
+        <div class="section">
+          <strong>Pagamento:</strong> ${paymentLabel(order.payment_method)}
+          ${order.change_for ? `<br /><strong>Troco para:</strong> R$ ${order.change_for}` : ''}
+        </div>
+
+        <div class="total">
+          Total: R$ ${Number(order.total_amount).toFixed(2)}
+        </div>
+
+        <script>
+          window.print()
+        </script>
+      </body>
+    </html>
+  `)
+
+  printWindow.document.close()
+}
+
+  function orderMinutesAgo(createdAt) {
+  if (!createdAt) return 0
+
+  const created = new Date(createdAt)
+
+  return Math.max(Math.floor((now - created) / 60000), 0)
+}
+
   return (
     <AdminLayout>
       <div>
@@ -266,6 +386,50 @@ const visibleOrders = baseOrders.filter(order => {
               Gerencie os pedidos da sua loja
             </p>
           </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6 max-w-5xl">
+
+  <div className="bg-white border border-zinc-200 rounded-2xl p-4 shadow-sm">
+    <p className="text-xs text-zinc-500 font-bold uppercase">
+      Recebidos
+    </p>
+
+    <p className="text-2xl font-black text-blue-700 mt-1">
+      {orders.filter(order => order.status === 'recebido').length}
+    </p>
+  </div>
+
+  <div className="bg-white border border-zinc-200 rounded-2xl p-4 shadow-sm">
+    <p className="text-xs text-zinc-500 font-bold uppercase">
+      Preparando
+    </p>
+
+    <p className="text-2xl font-black text-yellow-700 mt-1">
+      {orders.filter(order => order.status === 'preparando').length}
+    </p>
+  </div>
+
+  <div className="bg-white border border-zinc-200 rounded-2xl p-4 shadow-sm">
+    <p className="text-xs text-zinc-500 font-bold uppercase">
+      Entrega
+    </p>
+
+    <p className="text-2xl font-black text-purple-700 mt-1">
+      {orders.filter(order => order.status === 'entrega').length}
+    </p>
+  </div>
+
+  <div className="bg-white border border-zinc-200 rounded-2xl p-4 shadow-sm">
+    <p className="text-xs text-zinc-500 font-bold uppercase">
+      Hoje
+    </p>
+
+    <p className="text-2xl font-black text-amber-900 mt-1">
+      {orders.length}
+    </p>
+  </div>
+
+</div>
 
           <button
   onClick={enableSound}
@@ -287,7 +451,7 @@ const visibleOrders = baseOrders.filter(order => {
           </div>
         </div>
 
-        <div className="bg-white border rounded-2xl p-4 mb-6 max-w-3xl">
+        <div className="bg-white border border-zinc-300 rounded-2xl p-4 mb-6 max-w-3xl shadow-sm">
 
   <div className="grid gap-3 md:grid-cols-2">
 
@@ -295,13 +459,13 @@ const visibleOrders = baseOrders.filter(order => {
       value={search}
       onChange={(e) => setSearch(e.target.value)}
       placeholder="Buscar por cliente, telefone ou número do pedido"
-      className="w-full border rounded-xl p-3 text-sm"
+      className="w-full border border-zinc-200 rounded-xl p-3 text-sm shadow-sm"
     />
 
     <select
       value={statusFilter}
       onChange={(e) => setStatusFilter(e.target.value)}
-      className="w-full border rounded-xl p-3 text-sm"
+      className="w-full border border-zinc-200 rounded-xl p-3 text-sm shadow-sm"
     >
       <option value="todos">Todos os status</option>
       <option value="recebido">Recebido</option>
@@ -318,9 +482,9 @@ const visibleOrders = baseOrders.filter(order => {
 <div className="flex gap-2 mb-6">
           <button
             onClick={() => setTab('active')}
-            className={`px-4 py-2 rounded-xl text-sm font-bold ${
+            className={`px-4 py-2 rounded-xl text-white font-bold ${
               tab === 'active'
-                ? 'bg-white border shadow'
+                ? 'bg-amber-900 border border-amber-300 shadow-sm'
                 : 'bg-zinc-200 text-zinc-500'
             }`}
           >
@@ -329,9 +493,9 @@ const visibleOrders = baseOrders.filter(order => {
 
           <button
             onClick={() => setTab('finished')}
-            className={`px-4 py-2 rounded-xl text-sm font-bold ${
+            className={`px-4 py-2 rounded-xl text-white font-bold ${
               tab === 'finished'
-                ? 'bg-white border shadow'
+                ? 'bg-amber-900 border border-amber-300 shadow-sm'
                 : 'bg-zinc-200 text-zinc-500'
             }`}
           >
@@ -343,9 +507,18 @@ const visibleOrders = baseOrders.filter(order => {
           {visibleOrders.map(order => (
             <div
               key={order.id}
-              className="bg-white border border-zinc-200 rounded-2xl shadow-sm p-5"
+              className="
+  bg-white
+  border
+  border-zinc-200
+  rounded-3xl
+  shadow-sm
+  p-5
+  hover:shadow-md
+  transition-all
+"
             >
-              <div className="flex justify-between gap-4">
+              <div className="flex items-start justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-2">
                     <h2 className="font-black text-lg">
@@ -355,6 +528,12 @@ const visibleOrders = baseOrders.filter(order => {
                     <span className="text-xs bg-zinc-100 border px-2 py-1 rounded-full">
                       #{order.id}
                     </span>
+
+                    {!['finalizado', 'cancelado'].includes(order.status) && (
+  <span className="text-xs bg-amber-50 text-amber-800 border border-amber-200 px-2 py-1 rounded-full font-bold">
+    ⏱ {orderMinutesAgo(order.created_at)} min
+  </span>
+)}
                   </div>
 
                   <p className="text-xs text-zinc-500 mt-1">
@@ -390,7 +569,7 @@ const visibleOrders = baseOrders.filter(order => {
               </div>
 
               <div className="flex items-center justify-between mt-5 pt-4 border-t">
-                <p className="font-black text-lg">
+                <p className="font-black text-2xl text-amber-900">
                   R$ {Number(order.total_amount).toFixed(2)}
                 </p>
 
@@ -446,9 +625,19 @@ const visibleOrders = baseOrders.filter(order => {
                   DETALHES DO PEDIDO
                 </h2>
 
-                <span className={`px-3 py-1 rounded-full border text-xs font-bold ${statusClass(selectedOrder.status)}`}>
-                  {statusLabel(selectedOrder.status)}
-                </span>
+                <span
+  className={`
+    px-3
+    py-1
+    rounded-full
+    text-xs
+    font-bold
+    border
+    ${getStatusColor(selectedOrder.status)}
+  `}
+>
+  {statusLabel(selectedOrder.status)}
+</span>
               </div>
 
               <div className="bg-white border rounded-2xl p-3 text-center mb-3">
@@ -551,8 +740,10 @@ const visibleOrders = baseOrders.filter(order => {
 
                 <div className="grid grid-cols-3 gap-2 pt-1">
 
-                  <button className="flex-1 bg-white border py-2 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2">
-                    <Printer className="w-4 h-4" />
+                  <button
+  onClick={() => printOrder(selectedOrder)}
+  className="flex-1 bg-white border py-2 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2"
+>
                     Imprimir
                   </button>
 
