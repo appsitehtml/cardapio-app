@@ -192,6 +192,10 @@ function playNotificationSound() {
 
   if (!enabled) return
 
+  if (navigator.vibrate) {
+  navigator.vibrate([300, 100, 300])
+}
+
   if (!notificationAudio) {
     notificationAudio = new Audio('/notification.mp3')
     notificationAudio.volume = 1
@@ -277,7 +281,7 @@ const visibleOrders = baseOrders.filter(order => {
     return 'bg-yellow-100 text-yellow-700 border-yellow-300'
   }
 
-  return 'bg-amber-50 text-amber-800 border-amber-200'
+  return 'bg-blue-50 text-blue-800 border-blue-200'
 }
 
   function paymentLabel(method) {
@@ -391,7 +395,7 @@ const visibleOrders = baseOrders.filter(order => {
     <AdminLayout>
       <div>
 
-        <div className="flex items-start justify-between mb-6">
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
           <div>
             <h1 className="text-4xl font-black">PEDIDOS</h1>
             <p className="text-sm text-zinc-500 mt-1">
@@ -399,7 +403,7 @@ const visibleOrders = baseOrders.filter(order => {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6 max-w-5xl">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6 max-w-5xl">
 
   <div className="bg-white border border-zinc-200 rounded-2xl p-4 shadow-sm">
     <p className="text-xs text-zinc-500 font-bold uppercase">
@@ -457,8 +461,7 @@ const visibleOrders = baseOrders.filter(order => {
   🔊 {soundEnabled ? 'Som ativo' : 'Ativar som'}
 </button>
 
-          <div className="flex items-center gap-2 bg-green-50 text-green-700 border border-green-200 px-4 py-2 rounded-full text-sm font-bold">
-            <Wifi className="w-4 h-4" />
+          <div className="flex flex-wrap gap-2">
             Ao vivo
           </div>
         </div>
