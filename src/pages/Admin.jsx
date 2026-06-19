@@ -21,6 +21,7 @@ const [now, setNow] = useState(new Date())
 function enableSound() {
   notificationAudio = new Audio('/notification.mp3')
   notificationAudio.volume = 1
+  notificationAudio.load()
 
   notificationAudio.play().then(() => {
     notificationAudio.pause()
@@ -28,11 +29,10 @@ function enableSound() {
 
     localStorage.setItem('admin_sound_enabled', 'true')
     setSoundEnabled(true)
-
     toast.success('Som ativado')
   }).catch((error) => {
     console.log('ERRO AO ATIVAR SOM:', error)
-    toast.error('Clique novamente para ativar o som')
+    toast.error('Toque novamente em Ativar som')
   })
 }
 
@@ -189,16 +189,16 @@ if (nextStatus === 'finalizado' && order.status !== 'finalizado') {
 
 function playNotificationSound() {
   const enabled = localStorage.getItem('admin_sound_enabled') === 'true'
-
   if (!enabled) return
 
   if (navigator.vibrate) {
-  navigator.vibrate([300, 100, 300])
-}
+    navigator.vibrate([300, 100, 300])
+  }
 
   if (!notificationAudio) {
     notificationAudio = new Audio('/notification.mp3')
     notificationAudio.volume = 1
+    notificationAudio.load()
   }
 
   notificationAudio.currentTime = 0
