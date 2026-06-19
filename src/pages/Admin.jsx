@@ -268,6 +268,18 @@ const visibleOrders = baseOrders.filter(order => {
     return status
   }
 
+  function getTimeColor(minutes) {
+  if (minutes >= 30) {
+    return 'bg-red-100 text-red-700 border-red-300'
+  }
+
+  if (minutes >= 15) {
+    return 'bg-yellow-100 text-yellow-700 border-yellow-300'
+  }
+
+  return 'bg-amber-50 text-amber-800 border-amber-200'
+}
+
   function paymentLabel(method) {
   if (method === 'pix') return 'PIX'
   if (method === 'cartao') return 'Cartão'
@@ -462,18 +474,39 @@ const visibleOrders = baseOrders.filter(order => {
       className="w-full border border-zinc-200 rounded-xl p-3 text-sm shadow-sm"
     />
 
-    <select
-      value={statusFilter}
-      onChange={(e) => setStatusFilter(e.target.value)}
-      className="w-full border border-zinc-200 rounded-xl p-3 text-sm shadow-sm"
+    <div className="flex gap-2 overflow-x-auto">
+
+  {[
+    { value: 'todos', label: 'Todos' },
+    { value: 'recebido', label: 'Recebido' },
+    { value: 'preparando', label: 'Preparando' },
+    { value: 'entrega', label: 'Entrega' },
+    { value: 'finalizado', label: 'Finalizado' },
+    { value: 'cancelado', label: 'Cancelado' }
+  ].map(status => (
+    <button
+      key={status.value}
+      onClick={() => setStatusFilter(status.value)}
+      className={`
+        px-3
+        py-2
+        rounded-xl
+        text-xs
+        font-bold
+        whitespace-nowrap
+        border
+        ${
+          statusFilter === status.value
+            ? 'bg-amber-900 text-white border-amber-900'
+            : 'bg-white text-zinc-600 border-zinc-200'
+        }
+      `}
     >
-      <option value="todos">Todos os status</option>
-      <option value="recebido">Recebido</option>
-      <option value="preparando">Preparando</option>
-      <option value="entrega">Saiu Entrega</option>
-      <option value="finalizado">Finalizado</option>
-      <option value="cancelado">Cancelado</option>
-    </select>
+      {status.label}
+    </button>
+  ))}
+
+</div>
 
   </div>
 
@@ -529,11 +562,25 @@ const visibleOrders = baseOrders.filter(order => {
                       #{order.id}
                     </span>
 
-                    {!['finalizado', 'cancelado'].includes(order.status) && (
-  <span className="text-xs bg-amber-50 text-amber-800 border border-amber-200 px-2 py-1 rounded-full font-bold">
-    ⏱ {orderMinutesAgo(order.created_at)} min
-  </span>
-)}
+                    {!['finalizado', 'cancelado'].includes(order.status) && (() => {
+  const minutes = orderMinutesAgo(order.created_at)
+
+  return (
+    <span
+      className={`
+        text-xs
+        px-2
+        py-1
+        rounded-full
+        font-bold
+        border
+        ${getTimeColor(minutes)}
+      `}
+    >
+      ⏱ {minutes} min
+    </span>
+  )
+})()}
                   </div>
 
                   <p className="text-xs text-zinc-500 mt-1">
