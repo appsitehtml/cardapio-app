@@ -6,12 +6,21 @@ import AdminLayout from '../components/AdminLayout'
 
 export default function AdminCustomers() {
   const [orders, setOrders] = useState([])
+  const [loyaltyCards, setLoyaltyCards] = useState([])
+  const [search, setSearch] = useState('')
+  const [tierFilter, setTierFilter] = useState('todos')
 
   async function loadOrders() {
     const { data } = await supabase
       .from('orders')
       .select('*')
       .order('id', { ascending: false })
+
+       const { data: loyaltyData } = await supabase
+  .from('loyalty_cards')
+  .select('*')
+
+setLoyaltyCards(loyaltyData || [])
 
     setOrders(data || [])
   }
@@ -36,6 +45,10 @@ export default function AdminCustomers() {
       }
     }
 
+    const loyaltyCard = loyaltyCards.find(
+  card => card.customer_phone === key
+)
+
     customersMap[key].orders_count += 1
     customersMap[key].total_spent += Number(order.total_amount || 0)
 
@@ -43,8 +56,36 @@ export default function AdminCustomers() {
       customersMap[key].last_order_id = order.id
     }
   })
+const customers = Object.values(customersMap).map(customer => {
+  const loyaltyCard = loyaltyCards.find(
+    card => card.customer_phone === customer.phone
+  )
 
-  const customers = Object.values(customersMap)
+  return {
+    ...customer,
+    tier: loyaltyCard?.tier || 'bronze',
+    redeem_points: Number(loyaltyCard?.redeem_points || loyaltyCard?.points || 0),
+    level_points: Number(loyaltyCard?.level_points || loyaltyCard?.points || 0),
+    rewards_redeemed: Number(loyaltyCard?.rewards_redeemed || 0)
+  }
+})
+
+const visibleCustomers = customers.filter(customer => {
+  const term = search.toLowerCase()
+
+  const matchesSearch =
+    customer.name.toLowerCase().includes(term) ||
+    customer.phone.toLowerCase().includes(term)
+
+  const matchesTier =
+    tierFilter === 'todos' || customer.tier === tierFilter
+
+  return matchesSearch && matchesTier
+})
+
+const topCustomers = [...customers]
+  .sort((a, b) => b.total_spent - a.total_spent)
+  .slice(0, 5)
 
   return (
     <AdminLayout>
@@ -52,18 +93,60 @@ export default function AdminCustomers() {
       <div>
 
         <div className="mb-8">
-          <h1 className="text-4xl font-black">
+          <h1 className="text-4xl font-black text-amber-900">
             CLIENTES
           </h1>
 
           <p className="text-sm text-zinc-500 mt-1">
             Clientes gerados automaticamente a partir dos pedidos
           </p>
+
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buscar cliente por nome ou telefone..."
+            className="w-full border border-zinc-200 rounded-2xl p-4 mb-6 bg-white shadow-sm"
+          />
         </div>
+
+        <div className="flex gap-2 overflow-x-auto mb-6">
+
+  {[
+    { value: 'todos', label: 'Todos' },
+    { value: 'bronze', label: 'Bronze' },
+    { value: 'prata', label: 'Prata' },
+    { value: 'ouro', label: 'Ouro' },
+    { value: 'diamante', label: 'Diamante' }
+  ].map(tier => (
+    <button
+      key={tier.value}
+      onClick={() => setTierFilter(tier.value)}
+      className={`
+        px-4
+        py-2
+        rounded-xl
+        text-sm
+        font-bold
+        border
+        whitespace-nowrap
+        ${
+          tierFilter === tier.value
+            ? 'bg-amber-900 text-white border-amber-900'
+            : 'bg-white text-zinc-600 border-zinc-200'
+        }
+      `}
+    >
+      {tier.label}
+    </button>
+  ))}
+
+</div>
 
         <div className="grid gap-4 md:grid-cols-3 mb-8">
 
-          <div className="bg-white rounded-2xl p-5 border shadow-sm">
+          
+          <div className="bg-amber-50 rounded-2xl p-5 border border-amber-200 shadow-sm">
+           
             <p className="text-sm text-zinc-500">
               Clientes
             </p>
@@ -73,7 +156,7 @@ export default function AdminCustomers() {
             </p>
           </div>
 
-          <div className="bg-white rounded-2xl p-5 border shadow-sm">
+          <div className="bg-blue-50 rounded-2xl p-5 border border-blue-200 shadow-sm">
             <p className="text-sm text-zinc-500">
               Pedidos
             </p>
@@ -83,7 +166,7 @@ export default function AdminCustomers() {
             </p>
           </div>
 
-          <div className="bg-white rounded-2xl p-5 border shadow-sm">
+          <div className="bg-green-50 rounded-2xl p-5 border border-green-200 shadow-sm">
             <p className="text-sm text-zinc-500">
               Receita total
             </p>
@@ -94,6 +177,35 @@ export default function AdminCustomers() {
           </div>
 
         </div>
+
+        <div className="bg-white rounded-2xl p-5 border border-zinc-200 shadow-sm mb-6">
+  <h2 className="text-xl font-black text-amber-900 mb-4">
+    🏆 Top Clientes
+  </h2>
+
+  <div className="space-y-3">
+    {topCustomers.map((customer, index) => (
+      <div
+        key={customer.phone}
+        className="flex items-center justify-between"
+      >
+        <div>
+          <p className="font-bold">
+            #{index + 1} {customer.name}
+          </p>
+
+          <p className="text-xs text-zinc-500">
+            {customer.orders_count} pedidos
+          </p>
+        </div>
+
+        <p className="font-black text-green-600">
+          R$ {customer.total_spent.toFixed(2)}
+        </p>
+      </div>
+    ))}
+  </div>
+</div>
 
         {customers.length === 0 ? (
 
@@ -113,11 +225,11 @@ export default function AdminCustomers() {
 
           <div className="grid gap-4 md:grid-cols-2">
 
-            {customers.map(customer => (
+            {visibleCustomers.map(customer => (
 
               <div
                 key={customer.phone}
-                className="bg-white rounded-2xl p-5 border shadow-sm"
+                className="bg-white rounded-2xl p-5 border border-zinc-200 shadow-sm"
               >
 
                 <div className="flex items-start gap-4">
@@ -131,6 +243,10 @@ export default function AdminCustomers() {
                     <h2 className="text-xl font-black">
                       {customer.name}
                     </h2>
+
+                    <span className="inline-block mt-2 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-black uppercase">
+  {customer.tier}
+</span>
 
                     <div className="mt-3 space-y-2 text-sm text-zinc-500">
 
@@ -150,7 +266,27 @@ export default function AdminCustomers() {
 
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 mt-5">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-5">
+                  
+                  <div className="bg-purple-50 rounded-2xl p-4">
+  <p className="text-xs text-purple-700">
+    Pontos
+  </p>
+
+  <p className="text-2xl font-black mt-1 text-purple-700">
+    {customer.redeem_points.toFixed(2)}
+  </p>
+</div>
+
+<div className="bg-blue-50 rounded-2xl p-4">
+  <p className="text-xs text-blue-700">
+    Nível
+  </p>
+
+  <p className="text-2xl font-black mt-1 text-blue-700">
+    {customer.level_points.toFixed(2)}
+  </p>
+</div>
 
                   <div className="bg-zinc-100 rounded-2xl p-4">
                     <p className="text-xs text-zinc-500 flex items-center gap-1">

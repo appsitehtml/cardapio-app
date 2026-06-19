@@ -185,14 +185,14 @@ async function deleteProduct(id) {
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Nome"
-          className="w-full border p-4 rounded-2xl"
+          className="w-full border border-zinc-200 p-4 rounded-2xl shadow-sm"
         />
 
         <input
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Descrição"
-          className="w-full border p-4 rounded-2xl"
+          className="w-full border border-zinc-200 p-4 rounded-2xl shadow-sm"
         />
 
         <input
@@ -200,13 +200,13 @@ async function deleteProduct(id) {
           value={price}
           onChange={(e) => setPrice(e.target.value)}
           placeholder="Preço"
-          className="w-full border p-4 rounded-2xl"
+          className="w-full border border-zinc-200 p-4 rounded-2xl shadow-sm"
         />
 
         <select
   value={category}
   onChange={(e) => setCategory(e.target.value)}
-  className="w-full border p-4 rounded-2xl"
+  className="w-full border border-zinc-200 p-4 rounded-2xl shadow-sm"
 >
   <option>Hambúrgueres</option>
   <option>Bebidas</option>
