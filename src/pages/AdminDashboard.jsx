@@ -124,7 +124,7 @@ const todayRevenue = orders
           </p>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-5 mb-8">
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 mb-8">
           {cards.map(card => {
             const Icon = card.icon
 
