@@ -244,21 +244,7 @@ function playNotificationSound() {
       },
       (payload) => {
         loadOrders()
-
-        if (payload.eventType === 'INSERT') {
-  const order = payload.new
-
-  toast.success('🔔 Novo pedido recebido!')
-  playNotificationSound()
-
-  if ('Notification' in window && Notification.permission === 'granted') {
-    new Notification('🔔 Novo pedido recebido!', {
-      body: `${order.customer_name || 'Cliente'} · R$ ${Number(order.total_amount || 0).toFixed(2)}`,
-      icon: '/vite.svg'
-    })
-  }
 }
-      }
     )
     .subscribe()
 

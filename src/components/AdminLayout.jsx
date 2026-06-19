@@ -1,6 +1,7 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { LayoutDashboard, Package, ClipboardList, Users, Megaphone, BarChart3, DollarSign, QrCode, Star, Store, LogOut, Menu, X } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import toast from 'react-hot-toast'
 
 import { supabase } from '../lib/supabase'
 
@@ -62,6 +63,55 @@ export default function AdminLayout({ children }) {
   const navigate = useNavigate()
 
   const [mobileOpen, setMobileOpen] = useState(false)
+  function playNotificationSound() {
+  const enabled = localStorage.getItem('admin_sound_enabled') === 'true'
+
+  if (!enabled) return
+
+  if (navigator.vibrate) {
+    navigator.vibrate([700, 200, 700])
+  }
+
+  const audio = new Audio('/notification.mp3')
+  audio.volume = 1
+
+  audio.play().catch(() => {})
+}
+
+function showBrowserNotification(order) {
+  if (!('Notification' in window)) return
+  if (Notification.permission !== 'granted') return
+
+  new Notification('🔔 Novo pedido recebido!', {
+    body: `${order.customer_name || 'Cliente'} · R$ ${Number(order.total_amount || 0).toFixed(2)}`,
+    icon: '/vite.svg'
+  })
+}
+
+useEffect(() => {
+  const channel = supabase
+    .channel('admin-global-orders')
+    .on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'orders'
+      },
+      (payload) => {
+        const order = payload.new
+
+        toast.success('🔔 Novo pedido recebido!')
+        playNotificationSound()
+        showBrowserNotification(order)
+      }
+    )
+    .subscribe()
+
+  return () => {
+    supabase.removeChannel(channel)
+  }
+}, [])
 
   async function logout() {
     await supabase.auth.signOut()
