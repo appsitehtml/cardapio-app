@@ -30,6 +30,9 @@ function enableSound() {
     localStorage.setItem('admin_sound_enabled', 'true')
     setSoundEnabled(true)
     toast.success('Som ativado')
+    if (navigator.vibrate) {
+  navigator.vibrate([300, 100, 300])
+}
   }).catch((error) => {
     console.log('ERRO AO ATIVAR SOM:', error)
     toast.error('Toque novamente em Ativar som')
@@ -192,8 +195,8 @@ function playNotificationSound() {
   if (!enabled) return
 
   if (navigator.vibrate) {
-    navigator.vibrate([300, 100, 300])
-  }
+  navigator.vibrate([500, 150, 500])
+}
 
   if (!notificationAudio) {
     notificationAudio = new Audio('/notification.mp3')
