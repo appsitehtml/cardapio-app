@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Search, ShoppingBag, Star } from 'lucide-react'
 
@@ -17,6 +17,8 @@ const categories = [
 export default function Home() {
   const [products, setProducts] = useState([])
   const [banners, setBanners] = useState([])
+  const bannerRef = useRef(null)
+  const [currentBanner, setCurrentBanner] = useState(0)
   const [featuredProducts, setFeaturedProducts] = useState([])
   const [search, setSearch] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('Todos')
@@ -66,6 +68,21 @@ async function loadFeaturedProducts() {
     loadFeaturedProducts()
   }, [])
 
+ useEffect(() => {
+  if (banners.length <= 1) return
+
+  const timer = setInterval(() => {
+    const next =
+      currentBanner === banners.length - 1
+        ? 0
+        : currentBanner + 1
+
+    goToBanner(next)
+  }, 5000)
+
+  return () => clearInterval(timer)
+}, [banners, currentBanner])
+
   const cartQuantity = cart.reduce(
     (acc, item) => acc + item.quantity,
     0
@@ -94,6 +111,25 @@ async function loadFeaturedProducts() {
 function closeProduct() {
   setSelectedProduct(null)
   setQuantity(1)
+}
+
+function goToBanner(index) {
+  setCurrentBanner(index)
+
+  bannerRef.current?.scrollTo({
+    left: bannerRef.current.offsetWidth * index,
+    behavior: 'smooth'
+  })
+}
+
+function handleBannerScroll() {
+  if (!bannerRef.current) return
+
+  const index = Math.round(
+    bannerRef.current.scrollLeft / bannerRef.current.offsetWidth
+  )
+
+  setCurrentBanner(index)
 }
 
 function addSelectedProductToCart() {
@@ -145,77 +181,100 @@ function addSelectedProductToCart() {
       <main className="max-w-5xl mx-auto px-4 py-6">
 
         {banners.length > 0 && (
-  <div className="space-y-4 mb-6">
+  <div className="mb-6">
 
-    {banners.map(banner => {
-      const hasText =
-        banner.title ||
-        banner.subtitle ||
-        banner.footer_text
+    <div
+  ref={bannerRef}
+  onScroll={handleBannerScroll}
+  className="flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth hide-scrollbar"
+>
+      {banners.map((banner, index) => {
+        const hasText =
+          banner.title ||
+          banner.subtitle ||
+          banner.footer_text
 
-      return (
-        <div
-          key={banner.id}
-          className="relative overflow-hidden rounded-3xl bg-white shadow-lg border border-zinc-200"
-        >
+        return (
+          <div
+            key={banner.id}
+            className="min-w-full snap-center relative overflow-hidden rounded-3xl bg-white shadow-lg border border-zinc-200"
+          >
+            {banner.image_url && (
+              <img
+                src={banner.image_url}
+                alt={banner.title || 'Banner promocional'}
+                className="w-full h-32 md:h-48 object-cover"
+              />
+            )}
 
-          {banner.image_url && (
-            <img
-              src={banner.image_url}
-              alt={banner.title || 'Banner promocional'}
-              className="w-full h-36 md:h-56 object-cover"
-            />
-          )}
+            {!banner.image_url && (
+              <div className="bg-amber-950 text-white p-6 min-h-40">
+                {banner.title && (
+                  <h2 className="text-2xl md:text-3xl font-black">
+                    {banner.title}
+                  </h2>
+                )}
 
-          {!banner.image_url && (
-            <div className="bg-amber-950 text-white p-6 min-h-40">
-              <p className="text-xs font-black text-amber-200 uppercase tracking-wide">
-                Oferta especial
-              </p>
+                {banner.subtitle && (
+                  <p className="text-sm text-amber-100 mt-2">
+                    {banner.subtitle}
+                  </p>
+                )}
 
-              <h2 className="text-2xl md:text-3xl font-black mt-1 leading-tight">
-                {banner.title}
-              </h2>
+                {banner.footer_text && (
+                  <p className="text-xs font-black mt-4 bg-white/15 border border-white/20 rounded-full px-4 py-2 w-fit">
+                    {banner.footer_text}
+                  </p>
+                )}
+              </div>
+            )}
 
-              {banner.subtitle && (
-                <p className="text-sm text-amber-100 mt-2">
-                  {banner.subtitle}
-                </p>
-              )}
+            {banner.image_url && hasText && (
+              <div className="absolute left-4 top-4 max-w-[60%] text-white">
+                {banner.title && (
+                  <h2 className="text-xl md:text-3xl font-black leading-tight">
+                    {banner.title}
+                  </h2>
+                )}
 
-              {banner.footer_text && (
-                <p className="text-xs font-black mt-4 bg-white/15 border border-white/20 rounded-full px-4 py-2 w-fit">
-                  {banner.footer_text}
-                </p>
-              )}
-            </div>
-          )}
+                {banner.subtitle && (
+                  <p className="text-xs md:text-sm mt-2">
+                    {banner.subtitle}
+                  </p>
+                )}
 
-          {banner.image_url && hasText && (
-            <div className="absolute left-5 top-5 max-w-[55%] text-white">
-              {banner.title && (
-                <h2 className="text-2xl md:text-3xl font-black leading-tight">
-                  {banner.title}
-                </h2>
-              )}
+                {banner.footer_text && (
+                  <p className="text-xs font-black mt-3 bg-black/35 rounded-full px-3 py-1.5 w-fit">
+                    {banner.footer_text}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        )
+      })}
+    </div>
 
-              {banner.subtitle && (
-                <p className="text-sm mt-2">
-                  {banner.subtitle}
-                </p>
-              )}
-
-              {banner.footer_text && (
-                <p className="text-xs font-black mt-4 bg-black/35 rounded-full px-4 py-2 w-fit">
-                  {banner.footer_text}
-                </p>
-              )}
-            </div>
-          )}
-
-        </div>
-      )
-    })}
+    {banners.length > 1 && (
+  <div className="flex justify-center gap-2 mt-3">
+    {banners.map((_, index) => (
+      <button
+        key={index}
+        onClick={() => goToBanner(index)}
+        className={`
+          h-2
+          rounded-full
+          transition-all
+          ${
+            index === currentBanner
+              ? 'w-6 bg-amber-900'
+              : 'w-2 bg-zinc-300'
+          }
+        `}
+      />
+    ))}
+  </div>
+)}
 
   </div>
 )}
