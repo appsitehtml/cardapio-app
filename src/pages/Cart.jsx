@@ -64,7 +64,7 @@ useEffect(() => {
     .select('*')
     .eq('code', couponCode.trim().toUpperCase())
     .eq('active', true)
-    .single()
+    .maybeSingle()
 
   if (error || !data) {
     toast.error('Cupom inválido')
@@ -323,7 +323,7 @@ message += `\n\n*Total:* R$ ${finalTotal.toFixed(2)}`
       </div>
     </header>
 
-    <main className="max-w-xl mx-auto px-4 py-8">
+    <main className="max-w-xl mx-auto px-4 py-8 pb-40">
 
       <Link
         to="/"
@@ -423,7 +423,7 @@ message += `\n\n*Total:* R$ ${finalTotal.toFixed(2)}`
 
     {!selectedReward ? (
       <>
-        <p className="text-sm font-bold text-purple-700 mb-3">
+        <p className="text-sm font-bold text-blue-700 mb-3">
           🎁 Adicionar recompensa de fidelidade grátis
         </p>
 
@@ -445,8 +445,8 @@ message += `\n\n*Total:* R$ ${finalTotal.toFixed(2)}`
                 py-3
                 text-left
                 bg-white
-                hover:bg-purple-50
-                hover:border-purple-300
+                hover:bg-blue-50
+                hover:border-blue-300
                 transition-all
               "
             >
@@ -462,38 +462,43 @@ message += `\n\n*Total:* R$ ${finalTotal.toFixed(2)}`
         </div>
       </>
     ) : (
-      <div className="bg-purple-50 border border-purple-100 rounded-2xl p-4">
+  <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4">
 
-        <p className="text-xs font-bold text-purple-700 uppercase">
-          🎁 Recompensa selecionada
+    <div className="flex items-center justify-between gap-4">
+
+      <div>
+
+        <p className="text-xs font-black text-blue-700 uppercase">
+          🎁 Recompensa aplicada
         </p>
 
-        <h3 className="text-lg font-black mt-2">
+        <p className="font-bold text-zinc-800 mt-1">
           {selectedReward.name}
-        </h3>
-
-        <p className="text-sm text-purple-700 mt-1">
-          Será adicionada gratuitamente ao seu pedido.
         </p>
 
-        <div className="mt-3 flex items-center justify-between">
-
-          <span className="font-bold text-purple-800">
-            {selectedReward.points_required} pts
-          </span>
-
-          <button
-            type="button"
-            onClick={() => setSelectedReward(null)}
-            className="text-sm font-bold text-purple-700"
-          >
-            Trocar
-          </button>
-
-        </div>
+        <p className="text-xs text-blue-700 mt-1">
+          Será adicionada gratuitamente ao pedido
+        </p>
 
       </div>
-    )}
+
+      <button
+        type="button"
+        onClick={() => setSelectedReward(null)}
+        className="
+          text-xs
+          font-black
+          text-blue-700
+          hover:text-blue-900
+        "
+      >
+        Trocar
+      </button>
+
+    </div>
+
+  </div>
+)}
 
   </div>
 )}
@@ -521,6 +526,21 @@ message += `\n\n*Total:* R$ ${finalTotal.toFixed(2)}`
               R$ {finalTotal.toFixed(2)}
             </span>
           </div>
+
+          {discountAmount > 0 && (
+  <div className="
+    bg-green-50
+    border
+    border-green-200
+    rounded-2xl
+    p-4
+    mt-4
+  ">
+    <p className="font-bold text-green-700">
+      🎉 Você economizou R$ {discountAmount.toFixed(2)}
+    </p>
+  </div>
+)}
 
         </div>
 
@@ -636,57 +656,67 @@ message += `\n\n*Total:* R$ ${finalTotal.toFixed(2)}`
 
       </section>
 
-      <button
-        onClick={() => finishOrder(false)}
-        disabled={cart.length === 0}
-        className="
-          w-full
-          bg-amber-900
-          hover:bg-amber-950
-          text-white
-          py-4
-          rounded-2xl
-          font-bold
-          text-lg
-          shadow-lg
-          transition-all
-          duration-150
-          hover:scale-[1.02]
-          active:scale-95
-          disabled:opacity-50
-          disabled:cursor-not-allowed
-        "
-      >
-        Confirmar Pedido · R$ {finalTotal.toFixed(2)}
-      </button>
+      <div className="
+  fixed
+  bottom-0
+  left-0
+  right-0
+  bg-white
+  border-t
+  border-zinc-200
+  p-4
+  z-50
+  shadow-2xl
+">
 
-      <button
-        onClick={() => finishOrder(true)}
-        disabled={cart.length === 0}
-        className="
-          mt-3
-          w-full
-          bg-white
-          border
-          border-green-500
-          text-green-700
-          py-4
-          rounded-2xl
-          font-bold
-          text-lg
-          transition-all
-          duration-150
-          hover:bg-green-50
-          hover:scale-[1.02]
-          active:scale-95
-          disabled:opacity-50
-          disabled:cursor-not-allowed
-        "
-      >
-        💬 Finalizar pelo WhatsApp
-      </button>
+  <div className="max-w-xl mx-auto">
 
+    <div className="flex justify-between items-center mb-3">
+
+      <div>
+        <p className="text-xs text-zinc-500">
+          Total
+        </p>
+
+        <p className="text-2xl font-black text-amber-900">
+          R$ {finalTotal.toFixed(2)}
+        </p>
+      </div>
+
+      {discountAmount > 0 && (
+        <div className="text-right">
+          <p className="text-xs text-green-600">
+            Economia
+          </p>
+
+          <p className="font-black text-green-600">
+            R$ {discountAmount.toFixed(2)}
+          </p>
+        </div>
+      )}
+
+    </div>
+
+    <button
+      onClick={() => finishOrder(false)}
+      disabled={cart.length === 0}
+      className="
+        w-full
+        bg-amber-900
+        text-white
+        py-4
+        rounded-2xl
+        font-bold
+      "
+    >
+      Confirmar Pedido
+    </button>
+
+  </div>
+
+</div>
     </main>
+  
 
   </div>
 )

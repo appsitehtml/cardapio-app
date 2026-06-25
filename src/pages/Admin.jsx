@@ -416,7 +416,9 @@ const todayRevenue = orders
 
         <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
           <div>
-            <h1 className="text-4xl font-black">PEDIDOS</h1>
+            <h1 className="text-4xl font-title">
+  PEDIDOS
+</h1>
             <p className="text-sm text-zinc-500 mt-1">
               Gerencie os pedidos da sua loja
             </p>
@@ -697,7 +699,7 @@ const todayRevenue = orders
               </button>
 
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-lg font-black">
+                <h2 className="text-xl font-title">
                   DETALHES DO PEDIDO
                 </h2>
 

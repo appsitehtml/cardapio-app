@@ -93,9 +93,9 @@ const topCustomers = [...customers]
       <div>
 
         <div className="mb-8">
-          <h1 className="text-4xl font-black text-amber-900">
-            CLIENTES
-          </h1>
+          <h1 className="text-4xl font-title">
+  CLIENTES
+</h1>
 
           <p className="text-sm text-zinc-500 mt-1">
             Clientes gerados automaticamente a partir dos pedidos
@@ -179,7 +179,7 @@ const topCustomers = [...customers]
         </div>
 
         <div className="bg-white rounded-2xl p-5 border border-zinc-200 shadow-sm mb-6">
-  <h2 className="text-xl font-black text-amber-900 mb-4">
+ <h2 className="text-xl font-title text-amber-900 mb-4">
     🏆 Top Clientes
   </h2>
 
@@ -240,7 +240,7 @@ const topCustomers = [...customers]
 
                   <div className="flex-1">
 
-                    <h2 className="text-xl font-black">
+                    <h2 className="text-xl font-title">
                       {customer.name}
                     </h2>
 

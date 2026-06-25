@@ -3,6 +3,7 @@ import { Package, ShoppingBag, TrendingUp, DollarSign } from 'lucide-react'
 
 import { supabase } from '../lib/supabase'
 import AdminLayout from '../components/AdminLayout'
+import { getTodayBrazil } from '../utils/date'
 
 export default function AdminDashboard() {
   const [orders, setOrders] = useState([])
@@ -54,7 +55,7 @@ export default function AdminDashboard() {
     0
   )
 
-  const today = new Date().toISOString().split('T')[0]
+  const today = getTodayBrazil()
 
 const todayRevenue = orders
   .filter(order =>
@@ -115,9 +116,9 @@ const todayRevenue = orders
       <div>
 
         <div className="mb-8">
-          <h1 className="text-4xl font-black tracking-wide">
-            DASHBOARD
-          </h1>
+          <h1 className="text-4xl font-title tracking-wide">
+  DASHBOARD
+</h1>
 
           <p className="text-sm text-zinc-500 mt-1">
             junho de 2026
@@ -175,7 +176,7 @@ const todayRevenue = orders
 
         <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-6 mb-8">
 
-          <h2 className="text-xl font-black mb-6">
+          <h2 className="text-xl font-title mb-6">
             PEDIDOS EM ANDAMENTO
           </h2>
 
@@ -213,7 +214,7 @@ const todayRevenue = orders
         <div className="grid gap-4 md:grid-cols-2">
 
           <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-6">
-            <h2 className="text-xl font-black mb-5">
+            <h2 className="text-xl font-title mb-5">
               PRODUTOS
             </h2>
 
@@ -235,7 +236,7 @@ const todayRevenue = orders
           </div>
 
           <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-6">
-            <h2 className="text-xl font-black mb-5">
+            <h2 className="text-xl font-title mb-5">
               PEDIDOS FINALIZADOS
             </h2>
 

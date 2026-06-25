@@ -29,9 +29,9 @@ export default function Profile() {
           Voltar
         </Link>
 
-        <h1 className="text-4xl font-black mb-2">
-          PERFIL
-        </h1>
+       <h1 className="text-4xl font-title">
+  PERFIL
+</h1>
 
         <p className="text-zinc-500 mb-6">
           Salve seus dados para agilizar seus próximos pedidos.

@@ -83,9 +83,9 @@ export default function AdminLoyalty() {
       <div>
 
         <div className="mb-8">
-          <h1 className="text-4xl font-black">
-            FIDELIDADE
-          </h1>
+          <h1 className="text-4xl font-title">
+  FIDELIDADE
+</h1>
 
           <p className="text-sm text-zinc-500 mt-1">
             Gerencie recompensas e acompanhe os pontos dos clientes

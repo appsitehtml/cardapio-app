@@ -123,7 +123,7 @@ useEffect(() => {
       <div className="h-full flex flex-col bg-[#1b0f0b] text-zinc-200">
 
         <div className="p-5 border-b border-white/10">
-          <h1 className="text-xl font-black text-amber-700 tracking-wide">
+          <h1 className="text-xl font-title text-amber-700 tracking-wide">
             HORA BOA
           </h1>
 

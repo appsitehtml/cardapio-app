@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Package, ShoppingBag, Clock, Gift } from 'lucide-react'
+import { Package, ShoppingBag } from 'lucide-react'
+import OrderCard from '../components/OrderCard'
 
 import { supabase } from '../lib/supabase'
 
@@ -71,17 +72,25 @@ export default function MyOrders() {
   ]
 
   function stepIndex(status) {
-    return steps.findIndex(step => step.key === status)
-  }
+  return steps.findIndex(step => step.key === status)
+}
 
-  return (
-    <div className="min-h-screen bg-[#faf4ee]">
+const activeOrders = orders.filter(order =>
+  ['recebido', 'preparando', 'entrega'].includes(order.status)
+)
+
+const pastOrders = orders.filter(order =>
+  ['finalizado', 'cancelado'].includes(order.status)
+)
+
+return (
+  <div className="min-h-screen bg-[#faf4ee]">
 
       <main className="max-w-2xl mx-auto px-4 py-8">
 
-        <h1 className="text-4xl font-black mb-2">
-          MEUS PEDIDOS
-        </h1>
+        <h1 className="text-4xl font-title">
+  MEUS PEDIDOS
+</h1>
 
         <p className="text-zinc-500 mb-8">
           Acompanhe seus pedidos em tempo real.
@@ -108,132 +117,65 @@ export default function MyOrders() {
         ) : (
           <div className="space-y-5">
 
-            {orders.map(order => {
-              const currentStep = stepIndex(order.status)
+            <div className="space-y-8">
 
-              return (
-                <div
-                  key={order.id}
-                  className="bg-white rounded-3xl border border-zinc-200 shadow-sm p-5"
-                >
+  {activeOrders.length > 0 && (
+    <section>
+      <div className="bg-amber-900 text-white rounded-3xl p-5 mb-5 shadow-sm">
+  <p className="text-sm text-amber-100">
+    Seu pedido está sendo preparado por
+  </p>
 
-                  <div className="flex items-start justify-between gap-4 mb-5">
+  <h2 className="text-xl font-title">
+    HORA BOA BURGER
+  </h2>
 
-                    <div>
-                      <p className="text-sm text-zinc-500">
-                        Pedido
-                      </p>
+  <p className="text-sm text-amber-100 mt-2">
+    Acompanhe abaixo o andamento em tempo real.
+  </p>
+</div>
+      <div className="flex items-center gap-2 mb-4">
+        <span className="text-xl">🍔</span>
 
-                      <h2 className="text-2xl font-black">
-                        #{order.id}
-                      </h2>
-                    </div>
+        <h2 className="text-xl font-black">
+          Em andamento
+        </h2>
+      </div>
 
-                    <div className="text-right">
-                      <span className="inline-block px-3 py-1 rounded-full bg-amber-100 text-amber-900 text-xs font-black">
-                        {statusLabel(order.status)}
-                      </span>
+      <div className="space-y-5">
+        {activeOrders.map(order => (
+          <OrderCard
+  key={order.id}
+  order={order}
+  highlighted
+/>
+        ))}
+      </div>
+    </section>
+  )}
 
-                      <p className="flex items-center gap-1 justify-end text-xs text-zinc-500 mt-2">
-                        <Clock className="w-3 h-3" />
-                        {estimatedTime(order.status)}
-                      </p>
-                    </div>
+  {pastOrders.length > 0 && (
+    <section>
+      <div className="flex items-center gap-2 mb-4">
+        <span className="text-xl">📜</span>
 
-                  </div>
+        <h2 className="text-xl font-title">
+          Histórico
+        </h2>
+      </div>
 
-                  {order.status !== 'cancelado' && (
-                    <div className="mb-5">
+      <div className="space-y-5">
+        {pastOrders.map(order => (
+          <OrderCard
+            key={order.id}
+            order={order}
+          />
+        ))}
+      </div>
+    </section>
+  )}
 
-                      {steps.map((step, index) => {
-                        const active = index <= currentStep
-
-                        return (
-                          <div
-                            key={step.key}
-                            className="flex gap-3"
-                          >
-
-                            <div className="flex flex-col items-center">
-                              <div
-                                className={`
-                                  w-4
-                                  h-4
-                                  rounded-full
-                                  ${active ? 'bg-amber-900' : 'bg-zinc-300'}
-                                `}
-                              />
-
-                              {index < steps.length - 1 && (
-                                <div
-                                  className={`
-                                    w-0.5
-                                    h-8
-                                    ${active ? 'bg-amber-900' : 'bg-zinc-300'}
-                                  `}
-                                />
-                              )}
-                            </div>
-
-                            <p
-                              className={`
-                                text-sm
-                                font-bold
-                                -mt-1
-                                ${active ? 'text-amber-900' : 'text-zinc-400'}
-                              `}
-                            >
-                              {step.label}
-                            </p>
-
-                          </div>
-                        )
-                      })}
-
-                    </div>
-                  )}
-
-                  <div className="bg-zinc-50 rounded-2xl border p-4 space-y-3">
-
-                    {order.items?.map((item, index) => (
-                      <div
-                        key={index}
-                        className="flex justify-between text-sm"
-                      >
-                        <span>
-                          {item.quantity}x {item.name}
-                        </span>
-
-                        <span className="font-bold">
-                          R$ {(item.price * item.quantity).toFixed(2)}
-                        </span>
-                      </div>
-                    ))}
-
-                    {order.loyalty_reward_name && (
-                      <div className="flex items-center gap-2 text-purple-700 font-bold text-sm pt-3 border-t">
-                        <Gift className="w-4 h-4" />
-                        Recompensa: {order.loyalty_reward_name}
-                      </div>
-                    )}
-
-                  </div>
-
-                  <div className="flex justify-between items-center mt-5 pt-4 border-t">
-
-                    <span className="text-zinc-500">
-                      Total
-                    </span>
-
-                    <span className="text-2xl font-black text-amber-900">
-                      R$ {Number(order.total_amount || 0).toFixed(2)}
-                    </span>
-
-                  </div>
-
-                </div>
-              )
-            })}
+</div>
 
           </div>
         )}
