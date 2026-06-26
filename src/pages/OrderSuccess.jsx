@@ -36,7 +36,7 @@ export default function OrderSuccess() {
     Tempo estimado
   </p>
 
-  <p className="text-3xl font-title text-amber-900 mt-1">
+  <p className="text-3xl font-title text-[#4A1F08] mt-1">
     30–50 min
   </p>
 
@@ -44,7 +44,7 @@ export default function OrderSuccess() {
 
         {customerSaved && (
           <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mt-5 text-left">
-            <p className="font-bold text-amber-900">
+            <p className="font-bold text-[#4A1F08]">
               Suas informações foram salvas para o próximo pedido.
             </p>
           </div>
@@ -58,7 +58,7 @@ Você receberá atualizações conforme o pedido for preparado.
 
           <Link
             to="/my-orders"
-            className="bg-amber-900 text-white rounded-2xl py-4 font-bold flex items-center justify-center gap-2"
+            className="bg-[#4A1F08] text-white rounded-2xl py-4 font-bold flex items-center justify-center gap-2"
           >
             <ClipboardList className="w-5 h-5" />
             Acompanhar pedido

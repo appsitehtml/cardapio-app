@@ -207,7 +207,7 @@ const availableRewards = rewards.filter(reward => {
 
         <Link
           to="/"
-          className="inline-flex items-center gap-2 text-sm font-semibold mb-6 hover:text-amber-900"
+          className="inline-flex items-center gap-2 text-sm font-semibold mb-6 hover:text-[#4A1F08]"
         >
           <ArrowLeft className="w-4 h-4" />
           Voltar
@@ -235,7 +235,7 @@ const availableRewards = rewards.filter(reward => {
 
             <Link
               to="/profile"
-              className="inline-block mt-5 bg-amber-900 text-white px-5 py-3 rounded-xl font-bold"
+              className="inline-block mt-5 bg-[#4A1F08] text-white px-5 py-3 rounded-xl font-bold"
             >
               Ir para Perfil
             </Link>
@@ -283,7 +283,7 @@ const availableRewards = rewards.filter(reward => {
         Multiplicador
       </p>
 
-      <p className="text-2xl font-black text-amber-900">
+      <p className="text-2xl font-black text-[#4A1F08]">
         {currentTier.multiplier}
       </p>
     </div>
@@ -312,7 +312,7 @@ const availableRewards = rewards.filter(reward => {
 
     <div className="w-full h-3 bg-amber-200 rounded-full overflow-hidden">
       <div
-        className="h-full bg-amber-900 rounded-full transition-all"
+        className="h-full bg-[#4A1F08] rounded-full transition-all"
         style={{ width: `${safeProgress}%` }}
       />
     </div>
@@ -327,7 +327,7 @@ const availableRewards = rewards.filter(reward => {
       🎁
     </p>
 
-    <p className="text-3xl font-black text-amber-900">
+    <p className="text-3xl font-black text-[#4A1F08]">
       {points.toFixed(2)}
     </p>
 
@@ -370,7 +370,7 @@ const availableRewards = rewards.filter(reward => {
       whitespace-nowrap
       ${
         activeTab === 'overview'
-          ? 'bg-amber-900 text-white'
+          ? 'bg-[#4A1F08] text-white'
           : 'bg-white border border-zinc-200 shadow-sm'
       }
     `}
@@ -389,7 +389,7 @@ const availableRewards = rewards.filter(reward => {
       whitespace-nowrap
       ${
         activeTab === 'rewards'
-          ? 'bg-amber-900 text-white'
+          ? 'bg-[#4A1F08] text-white'
           : 'bg-white border border-zinc-200 shadow-sm'
       }
     `}
@@ -408,7 +408,7 @@ const availableRewards = rewards.filter(reward => {
       whitespace-nowrap
       ${
         activeTab === 'history'
-          ? 'bg-amber-900 text-white'
+          ? 'bg-[#4A1F08] text-white'
           : 'bg-white border border-zinc-200 shadow-sm'
       }
     `}
@@ -454,7 +454,7 @@ const availableRewards = rewards.filter(reward => {
             {nextTier.label}
           </p>
 
-          <p className="text-sm text-amber-900 mt-1">
+          <p className="text-sm text-[#4A1F08] mt-1">
             Faltam {pointsToNext.toFixed(2)} pontos
           </p>
 
@@ -545,7 +545,7 @@ const availableRewards = rewards.filter(reward => {
 
                         <div className="mt-0 flex items-center justify-between">
 
-                          <span className="font-bold text-amber-900">
+                          <span className="font-bold text-[#4A1F08]">
                             {reward.points_required} pontos
                           </span>
 

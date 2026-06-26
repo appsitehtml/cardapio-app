@@ -249,7 +249,7 @@ async function deleteExtra(id) {
               Produtos ativos
             </p>
 
-            <p className="text-2xl font-black text-amber-900">
+            <p className="text-2xl font-black text-[#4A1F08]">
               {products.filter(product => product.active !== false).length}
             </p>
           </div>
@@ -326,7 +326,7 @@ async function deleteExtra(id) {
           {description || 'Descrição do produto'}
         </p>
 
-        <p className="text-2xl font-black text-amber-900 mt-3">
+        <p className="text-2xl font-black text-[#4A1F08] mt-3">
           R$ {Number(price || 0).toFixed(2)}
         </p>
 
@@ -342,7 +342,7 @@ async function deleteExtra(id) {
             onClick={createProduct}
             className="
               mt-4
-              bg-amber-900
+              bg-[#4A1F08]
               text-white
               px-6
               py-4
@@ -403,7 +403,7 @@ async function deleteExtra(id) {
             <div className="flex gap-3">
               <button
                 onClick={saveEdit}
-                className="flex-1 bg-amber-900 text-white py-4 rounded-2xl font-bold"
+                className="flex-1 bg-[#4A1F08] text-white py-4 rounded-2xl font-bold"
               >
                 Salvar Alterações
               </button>
@@ -448,7 +448,7 @@ async function deleteExtra(id) {
         border
         ${
           categoryFilter === item
-            ? 'bg-amber-900 text-white border-amber-900'
+            ? 'bg-[#4A1F08] text-white border-[#4A1F08]'
             : 'bg-white text-zinc-600 border-zinc-200'
         }
       `}
@@ -512,7 +512,7 @@ async function deleteExtra(id) {
     <button
       onClick={createExtra}
       className="
-        bg-amber-900
+        bg-[#4A1F08]
         text-white
         rounded-2xl
         font-bold
@@ -654,7 +654,7 @@ async function deleteExtra(id) {
                   {product.description}
                 </p>
 
-                <p className="text-2xl font-black text-amber-900 mt-4">
+                <p className="text-2xl font-black text-[#4A1F08] mt-4">
                   R$ {Number(product.price || 0).toFixed(2)}
                 </p>
 

@@ -107,7 +107,7 @@ return (
 
             <Link
               to="/"
-              className="inline-flex items-center gap-2 bg-amber-900 text-white px-5 py-3 rounded-xl font-bold"
+              className="inline-flex items-center gap-2 bg-[#4A1F08] text-white px-5 py-3 rounded-xl font-bold"
             >
               <ShoppingBag className="w-4 h-4" />
               Ver Cardápio
@@ -121,7 +121,7 @@ return (
 
   {activeOrders.length > 0 && (
     <section>
-      <div className="bg-amber-900 text-white rounded-3xl p-5 mb-5 shadow-sm">
+      <div className="bg-[#4A1F08] text-white rounded-3xl p-5 mb-5 shadow-sm">
   <p className="text-sm text-amber-100">
     Seu pedido está sendo preparado por
   </p>

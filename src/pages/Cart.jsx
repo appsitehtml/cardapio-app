@@ -399,25 +399,25 @@ navigate('/order-success', {
     <header className="sticky top-0 z-40 bg-[#faf4ee]/95 backdrop-blur border-b border-zinc-200">
       <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
 
-        <Link to="/" className="text-xl font-black text-amber-900 tracking-wide">
+        <Link to="/" className="text-xl font-black text-[#4A1F08] tracking-wide">
           HORA BOA BURGER
         </Link>
 
         <nav className="hidden md:flex items-center gap-8 text-sm font-semibold text-zinc-600">
 
-          <Link to="/" className="flex items-center gap-2 hover:text-amber-900">
+          <Link to="/" className="flex items-center gap-2 hover:text-[#4A1F08]">
             <ShoppingBag className="w-4 h-4" />
             Cardápio
           </Link>
 
-          <Link to="/my-orders" className="flex items-center gap-2 hover:text-amber-900">
+          <Link to="/my-orders" className="flex items-center gap-2 hover:text-[#4A1F08]">
             <ClipboardList className="w-4 h-4" />
             Pedidos
           </Link>
 
           <Link
   to="/loyalty"
-  className="flex items-center gap-2 hover:text-amber-900"
+  className="flex items-center gap-2 hover:text-[#4A1F08]"
 >
   <Star className="w-4 h-4" />
   Fidelidade
@@ -425,7 +425,7 @@ navigate('/order-success', {
 
           <Link
   to="/profile"
-  className="flex items-center gap-2 hover:text-amber-900"
+  className="flex items-center gap-2 hover:text-[#4A1F08]"
 >
   <User className="w-4 h-4" />
   Perfil
@@ -440,7 +440,7 @@ navigate('/order-success', {
 
       <Link
         to="/"
-        className="inline-flex items-center gap-2 text-sm font-semibold mb-6 hover:text-amber-900"
+        className="inline-flex items-center gap-2 text-sm font-semibold mb-6 hover:text-[#4A1F08]"
       >
         <ArrowLeft className="w-4 h-4" />
         Voltar
@@ -469,7 +469,7 @@ navigate('/order-success', {
         border
         ${
           checkoutStep === item.step
-            ? 'bg-amber-900 text-white border-amber-900'
+            ? 'bg-[#4A1F08] text-white border-[#4A1F08]'
             : 'bg-white text-zinc-500 border-zinc-200'
         }
       `}
@@ -795,7 +795,7 @@ navigate('/order-success', {
             }}
             className={`border rounded-2xl p-4 font-bold ${
               paymentMethod === 'pix'
-                ? 'border-amber-900 text-amber-900 bg-amber-50'
+                ? 'border-amber-900 text-[#4A1F08] bg-amber-50'
                 : 'border-zinc-200'
             }`}
           >
@@ -811,7 +811,7 @@ navigate('/order-success', {
             }}
             className={`border rounded-2xl p-4 font-bold ${
               paymentMethod === 'cartao'
-                ? 'border-amber-900 text-amber-900 bg-amber-50'
+                ? 'border-amber-900 text-[#4A1F08] bg-amber-50'
                 : 'border-zinc-200'
             }`}
           >
@@ -824,7 +824,7 @@ navigate('/order-success', {
             onClick={() => setPaymentMethod('dinheiro')}
             className={`border rounded-2xl p-4 font-bold ${
               paymentMethod === 'dinheiro'
-                ? 'border-amber-900 text-amber-900 bg-amber-50'
+                ? 'border-amber-900 text-[#4A1F08] bg-amber-50'
                 : 'border-zinc-200'
             }`}
           >
@@ -869,7 +869,7 @@ navigate('/order-success', {
           Total
         </p>
 
-        <p className="text-2xl font-black text-amber-900">
+        <p className="text-2xl font-black text-[#4A1F08]">
           R$ {finalTotal.toFixed(2)}
         </p>
       </div>
@@ -904,7 +904,7 @@ navigate('/order-success', {
     <button
       type="button"
       onClick={goNextStep}
-      className="flex-1 bg-amber-900 text-white py-4 rounded-2xl font-bold"
+      className="flex-1 bg-[#4A1F08] text-white py-4 rounded-2xl font-bold"
     >
       Continuar
     </button>
@@ -1010,7 +1010,7 @@ navigate('/order-success', {
 
         <div className="flex justify-between text-xl font-black pt-2 border-t">
           <span>Total</span>
-          <span className="text-amber-900">
+          <span className="text-[#4A1F08]">
             R$ {finalTotal.toFixed(2)}
           </span>
         </div>
@@ -1025,7 +1025,7 @@ navigate('/order-success', {
   <button
     onClick={() => finishOrder(false)}
     disabled={cart.length === 0}
-    className="w-full bg-amber-900 text-white py-4 rounded-2xl font-bold text-lg"
+    className="w-full bg-[#4A1F08] text-white py-4 rounded-2xl font-bold text-lg"
   >
     Confirmar Pedido
   </button>

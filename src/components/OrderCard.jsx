@@ -132,7 +132,7 @@ function reorder() {
         </div>
 
         <div className="text-right">
-          <span className="inline-block px-3 py-1 rounded-full bg-amber-100 text-amber-900 text-xs font-black">
+          <span className="inline-block px-3 py-1 rounded-full bg-amber-100 text-[#4A1F08] text-xs font-black">
             {statusLabel(order.status)}
           </span>
 
@@ -187,7 +187,7 @@ function reorder() {
 
     <div className="w-full h-3 bg-zinc-200 rounded-full overflow-hidden">
       <div
-        className="h-full bg-amber-900 rounded-full transition-all duration-500"
+        className="h-full bg-[#4A1F08] rounded-full transition-all duration-500"
         style={{ width: `${progressPercent}%` }}
       />
     </div>
@@ -214,7 +214,7 @@ function reorder() {
                 font-black
                 ${
                   active
-                    ? 'bg-amber-900 text-white'
+                    ? 'bg-[#4A1F08] text-white'
                     : 'bg-zinc-200 text-zinc-400'
                 }
               `}
@@ -230,7 +230,7 @@ function reorder() {
                 leading-tight
                 ${
                   active
-                    ? 'text-amber-900'
+                    ? 'text-[#4A1F08]'
                     : 'text-zinc-400'
                 }
               `}
@@ -290,7 +290,7 @@ function reorder() {
   )}
 
   {order.loyalty_reward_name && (
-    <div className="flex justify-between text-sm text-amber-900 font-bold shadow-sm">
+    <div className="flex justify-between text-sm text-[#4A1F08] font-bold shadow-sm">
       <span>Recompensa usada</span>
 
       <span>
@@ -304,7 +304,7 @@ function reorder() {
       Total
     </span>
 
-    <span className="text-2xl font-black text-amber-900">
+    <span className="text-2xl font-black text-[#4A1F08]">
       R$ {Number(order.total_amount || 0).toFixed(2)}
     </span>
   </div>
@@ -316,7 +316,7 @@ function reorder() {
     className="
       mt-4
       w-full
-      bg-amber-900
+      bg-[#4A1F08]
       text-white
       rounded-2xl
       py-3

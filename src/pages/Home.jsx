@@ -211,7 +211,7 @@ function addSelectedProductToCart() {
       {cart.length > 0 && (
         <Link
           to="/cart"
-          className="relative w-10 h-10 rounded-full bg-amber-900 text-white flex items-center justify-center"
+          className="relative w-10 h-10 rounded-full bg-[#4A1F08] text-white flex items-center justify-center"
         >
           <ShoppingBag className="w-5 h-5" />
 
@@ -315,7 +315,7 @@ function addSelectedProductToCart() {
           transition-all
           ${
             index === currentBanner
-              ? 'w-6 bg-amber-900'
+              ? 'w-6 bg-[#4A1F08]'
               : 'w-2 bg-zinc-300'
           }
         `}
@@ -326,19 +326,6 @@ function addSelectedProductToCart() {
 
   </div>
 )}
-
-        <div className="bg-white border border-zinc-200 rounded-2xl p-4 shadow-sm mb-4">
-          <div className="flex items-center gap-3">
-            <Search className="w-5 h-5 text-zinc-400" />
-
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar hambúrguer, combo, bebida..."
-              className="w-full outline-none text-sm"
-            />
-          </div>
-        </div>
 
         {featuredProducts.length > 0 && (
   <section className="mb-8">
@@ -357,16 +344,15 @@ function addSelectedProductToCart() {
             key={item.id}
             onClick={() => openProduct(product)}
             className="
-  min-w-[140px]
-  max-w-[140px]
-  md:min-w-0
-  md:max-w-none
-  bg-white
+  flex-none
+  w-[145px]
+  md:w-auto
+  bg-[#FFFCF9]
   rounded-2xl
   overflow-hidden
   border
-  border-zinc-200
-  shadow-sm
+  border-[#E9DED2]
+  shadow-[0_8px_24px_rgba(0,0,0,0.05)]
   cursor-pointer
 "
           >
@@ -375,7 +361,7 @@ function addSelectedProductToCart() {
               <img
   src={product.image_url}
   alt={product.name}
-  className="w-full h-24 md:h-40 object-cover"
+  className="w-full h-24 md:h-40 object-contain bg-[#FBF3EA]"
 />
             )}
 
@@ -385,13 +371,13 @@ function addSelectedProductToCart() {
                 {product.name}
               </h3>
 
-              <p className="text-zinc-500 mt-1 line-clamp-2">
-                {product.description}
-              </p>
+              <p className="text-sm text-zinc-500 mt-3 leading-5 line-clamp-2 min-h-10">
+  {product.description}
+</p>
 
               <div className="flex items-center justify-between mt-2">
 
-                <span className="text-sm font-black text-amber-900">
+                <span className="text-sm font-black text-[#4A1F08]">
                   R$ {Number(product.price).toFixed(2)}
                 </span>
 
@@ -401,13 +387,15 @@ function addSelectedProductToCart() {
                     addToCart(product)
                   }}
                   className="
-                    bg-amber-900
-                    text-white
-                    px-3
-                    py-1
-                    rounded-xl
-                    font-bold
-                  "
+  bg-[#5A2100]
+  text-white
+  w-9
+  h-9
+  rounded-full
+  font-black
+  shadow-lg
+  active:scale-95
+"
                 >
                   +
                 </button>
@@ -441,7 +429,7 @@ function addSelectedProductToCart() {
                 border
                 ${
                   selectedCategory === category
-                    ? 'bg-amber-900 text-white border-amber-900'
+                    ? 'bg-[#4A1F08] text-white border-[#4A1F08]'
                     : 'bg-white text-zinc-600 border-zinc-200'
                 }
               `}
@@ -457,82 +445,85 @@ function addSelectedProductToCart() {
             Nenhum produto encontrado.
           </div>
         ) : (
-          <div className="grid gap-5 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-3">
 
             {filteredProducts.map(product => (
               <div
   key={product.id}
   onClick={() => openProduct(product)}
   className="
-    bg-white
-    rounded-3xl
+    bg-[#FFFCF7]
+    rounded-xl
     border
-    border-zinc-200
-    shadow-sm
+    border-[#E7DED5]
     overflow-hidden
     cursor-pointer
-    transition-all
-    hover:scale-[1.01]
   "
 >
+ <div className="h-[200px] overflow-hidden">
+  {product.image_url ? (
+    <img
+      src={product.image_url}
+      alt={product.name}
+      className="w-full h-full object-cover"
+    />
+  ) : (
+    <div className="w-full h-full flex items-center justify-center text-zinc-400 text-sm font-bold">
+      Sem imagem
+    </div>
+  )}
+</div>
 
-                {product.image_url ? (
-                  <img
-                    src={product.image_url}
-                    alt={product.name}
-                    className="w-full h-56 object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-56 bg-zinc-100 flex items-center justify-center text-zinc-400 font-bold">
-                    Sem imagem
-                  </div>
-                )}
+  <div className="p-4">
 
-                <div className="p-5">
+    <div className="flex items-start justify-between gap-3">
+      <h3 className="text-[17px] font-black text-[#2B211B] leading-tight">
+        {product.name}
+      </h3>
 
-                  <p className="text-xs text-amber-800 font-black uppercase">
-                    {product.category || 'Produto'}
-                  </p>
+      <p className="text-[17px] font-black text-[#4A1E05] whitespace-nowrap">
+        R$ {Number(product.price || 0).toFixed(2)}
+      </p>
+    </div>
 
-                  <h3 className="text-2xl font-black mt-1">
-                    {product.name}
-                  </h3>
+    <p className="text-[15px] text-[#8A7465] mt-3 leading-5 line-clamp-2 min-h-[40px]">
+      {product.description}
+    </p>
 
-                  <p className="text-sm text-zinc-500 mt-2 min-h-10">
-                    {product.description}
-                  </p>
+    <button
+      onClick={(e) => {
+        e.stopPropagation()
+        openProduct(product)
+      }}
+      className="
+        mt-4
+        w-full
+        h-[34px]
+        bg-[#4A1E05]
+        text-white
+        rounded-lg
+        font-bold
+        text-sm
+        flex
+        items-center
+        justify-center
+        gap-3
+        active:scale-95
+        transition-all
+      "
+    >
+      <span className="text-xl leading-none font-normal">
+        +
+      </span>
 
-                  <div className="flex items-center justify-between mt-5 gap-4">
+      <span>
+        Adicionar
+      </span>
+    </button>
 
-                    <p className="text-2xl font-black text-amber-900">
-                      R$ {Number(product.price || 0).toFixed(2)}
-                    </p>
+  </div>
+</div>
 
-                    <button
-  onClick={(e) => {
-    e.stopPropagation()
-    openProduct(product)
-  }}
-                      className="
-                        bg-amber-900
-                        text-white
-                        px-5
-                        py-3
-                        rounded-2xl
-                        font-bold
-                        transition-all
-                        hover:scale-[1.03]
-                        active:scale-95
-                      "
-                    >
-                      Adicionar
-                    </button>
-
-                  </div>
-
-                </div>
-
-              </div>
             ))}
 
           </div>
@@ -543,7 +534,9 @@ function addSelectedProductToCart() {
       {selectedProduct && (
   <div className="fixed inset-0 z-50 bg-black/50 flex items-end md:items-center justify-center p-4">
 
-    <div className="bg-[#faf4ee] rounded-t-3xl md:rounded-3xl w-full max-w-md max-h-[92vh] overflow-y-auto shadow-2xl">
+    <div className="fixed inset-0 z-50 bg-[#faf4ee]">
+
+  <div className="h-full overflow-y-auto pb-28">
 
       {selectedProduct.image_url && (
         <img
@@ -553,12 +546,12 @@ function addSelectedProductToCart() {
         />
       )}
 
-      <div className="p-5">
+      <div className="px-6 py-5">
 
         <div className="flex items-start justify-between gap-4">
 
           <div>
-            <p className="text-xs text-amber-800 font-black uppercase">
+            <p className="text-xs text-[#4A1F08] font-black uppercase">
               {selectedProduct.category || 'Produto'}
             </p>
 
@@ -568,11 +561,11 @@ function addSelectedProductToCart() {
           </div>
 
           <button
-            onClick={closeProduct}
-            className="bg-white border rounded-full w-9 h-9 font-black"
-          >
-            ×
-          </button>
+  onClick={closeProduct}
+  className="absolute top-4 right-4 bg-white/90 border rounded-full w-10 h-10 font-black z-[70]"
+>
+  ×
+</button>
 
         </div>
 
@@ -621,14 +614,14 @@ function addSelectedProductToCart() {
             `}
           >
             <div>
-              <p className="font-bold">
-                {extra.name}
-              </p>
+  <p className="font-bold">
+    {extra.name}
+  </p>
 
-              <p className="text-sm text-zinc-500">
-                + R$ {Number(extra.price || 0).toFixed(2)}
-              </p>
-            </div>
+  <p className="text-sm text-zinc-500">
+    + R$ {Number(extra.price || 0).toFixed(2)}
+  </p>
+</div>
 
             <div
               className={`
@@ -643,7 +636,7 @@ function addSelectedProductToCart() {
                 font-black
                 ${
                   checked
-                    ? 'bg-amber-900 text-white border-amber-900'
+                    ? 'bg-[#4A1F08] text-white border-[#4A1F08]'
                     : 'border-zinc-300'
                 }
               `}
@@ -658,37 +651,9 @@ function addSelectedProductToCart() {
   </div>
 )}
 
-        <div className="flex items-center justify-between mt-6">
+    </div>
 
-          <span className="font-bold">
-            Quantidade
-          </span>
-
-          <div className="flex items-center gap-3">
-
-            <button
-              onClick={() => setQuantity(Math.max(quantity - 1, 1))}
-              className="w-10 h-10 rounded-full bg-white border font-black"
-            >
-              -
-            </button>
-
-            <span className="font-black text-xl w-6 text-center">
-              {quantity}
-            </span>
-
-            <button
-              onClick={() => setQuantity(quantity + 1)}
-              className="w-10 h-10 rounded-full bg-white border font-black"
-            >
-              +
-            </button>
-
-          </div>
-
-        </div>
-
-        <div className="mt-5">
+        <div className="mt-6">
   <label className="block text-sm font-bold mb-2">
     Observações do item
   </label>
@@ -701,23 +666,53 @@ function addSelectedProductToCart() {
   />
 </div>
 
-  <div className="sticky bottom-0 bg-[#faf4ee] pt-3 pb-4">
-  <button
-    onClick={addSelectedProductToCart}
-          className="
-      w-full
-      bg-amber-900
-      text-white
-      py-4
-      rounded-2xl
-      font-bold
-      text-lg
-      transition-all
-      active:scale-95
-    "
-  >
-    Adicionar · R$ {productTotal.toFixed(2)}
-  </button>
+  <div className="fixed bottom-0 left-0 right-0 z-[60] bg-[#faf4ee] border-t border-zinc-200 p-4">
+
+  <div className="max-w-5xl mx-auto flex items-center gap-3">
+
+    <div className="flex items-center gap-3 bg-white border border-zinc-200 rounded-2xl px-3 py-2">
+
+      <button
+        type="button"
+        onClick={() => setQuantity(Math.max(quantity - 1, 1))}
+        className="w-9 h-9 rounded-full bg-zinc-100 font-black"
+      >
+        -
+      </button>
+
+      <span className="font-black text-lg w-6 text-center">
+        {quantity}
+      </span>
+
+      <button
+        type="button"
+        onClick={() => setQuantity(quantity + 1)}
+        className="w-9 h-9 rounded-full bg-zinc-100 font-black"
+      >
+        +
+      </button>
+
+    </div>
+
+    <button
+      onClick={addSelectedProductToCart}
+      className="
+        flex-1
+        bg-[#4A1F08]
+        text-white
+        py-4
+        rounded-2xl
+        font-bold
+        text-base
+        transition-all
+        active:scale-95
+      "
+    >
+      Adicionar · R$ {productTotal.toFixed(2)}
+    </button>
+
+  </div>
+
 </div>
 
       </div>
@@ -727,10 +722,11 @@ function addSelectedProductToCart() {
   </div>
 )}
 
-<nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#faf4ee] border-t border-zinc-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
+{!selectedProduct && (
+  <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#faf4ee] border-t border-zinc-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
   <div className="grid grid-cols-4 py-2">
 
-    <Link to="/" className="flex flex-col items-center gap-1 text-amber-900 text-xs font-bold">
+    <Link to="/" className="flex flex-col items-center gap-1 text-[#4A1F08] text-xs font-bold">
       <ShoppingBag className="w-5 h-5" />
       Cardápio
     </Link>
@@ -752,6 +748,7 @@ function addSelectedProductToCart() {
 
   </div>
 </nav>
+)}
 
     </div>
   )

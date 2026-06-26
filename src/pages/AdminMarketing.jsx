@@ -267,7 +267,7 @@ loadFeaturedProducts()
               whitespace-nowrap
               ${
                 activeTab === tab.value
-                  ? 'bg-amber-900 text-white border-amber-900'
+                  ? 'bg-[#4A1F08] text-white border-[#4A1F08]'
                   : 'bg-white text-zinc-600 border-zinc-200'
               }
             `}
@@ -348,7 +348,7 @@ loadFeaturedProducts()
               <button
                 onClick={createCoupon}
                 className="
-                  bg-amber-900
+                  bg-[#4A1F08]
                   text-white
                   rounded-xl
                   font-bold
@@ -523,7 +523,7 @@ loadFeaturedProducts()
               onClick={createBanner}
               className="
                 mt-4
-                bg-amber-900
+                bg-[#4A1F08]
                 text-white
                 rounded-xl
                 px-6
@@ -573,7 +573,7 @@ loadFeaturedProducts()
                     )}
 
                     {banner.footer_text && (
-                      <p className="text-sm font-bold text-amber-900 mt-3">
+                      <p className="text-sm font-bold text-[#4A1F08] mt-3">
                         {banner.footer_text}
                       </p>
                     )}
@@ -666,7 +666,7 @@ loadFeaturedProducts()
         <button
           onClick={createFeaturedProduct}
           className="
-            bg-amber-900
+            bg-[#4A1F08]
             text-white
             rounded-xl
             font-bold

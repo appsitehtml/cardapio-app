@@ -131,7 +131,7 @@ const topCustomers = [...customers]
         whitespace-nowrap
         ${
           tierFilter === tier.value
-            ? 'bg-amber-900 text-white border-amber-900'
+            ? 'bg-[#4A1F08] text-white border-[#4A1F08]'
             : 'bg-white text-zinc-600 border-zinc-200'
         }
       `}
@@ -179,7 +179,7 @@ const topCustomers = [...customers]
         </div>
 
         <div className="bg-white rounded-2xl p-5 border border-zinc-200 shadow-sm mb-6">
- <h2 className="text-xl font-title text-amber-900 mb-4">
+ <h2 className="text-xl font-title text-[#4A1F08] mb-4">
     🏆 Top Clientes
   </h2>
 

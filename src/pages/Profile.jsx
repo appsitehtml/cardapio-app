@@ -23,7 +23,7 @@ export default function Profile() {
 
         <Link
           to="/"
-          className="inline-flex items-center gap-2 text-sm font-semibold mb-6 hover:text-amber-900"
+          className="inline-flex items-center gap-2 text-sm font-semibold mb-6 hover:text-[#4A1F08]"
         >
           <ArrowLeft className="w-4 h-4" />
           Voltar
@@ -85,7 +85,7 @@ export default function Profile() {
             onClick={saveProfile}
             className="
               w-full
-              bg-amber-900
+              bg-[#4A1F08]
               text-white
               py-4
               rounded-2xl

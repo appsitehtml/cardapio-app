@@ -123,7 +123,7 @@ useEffect(() => {
       <div className="h-full flex flex-col bg-[#1b0f0b] text-zinc-200">
 
         <div className="p-5 border-b border-white/10">
-          <h1 className="text-xl font-title text-amber-700 tracking-wide">
+          <h1 className="text-xl font-title text-[#4A1F08]-700 tracking-wide">
             HORA BOA
           </h1>
 
@@ -153,7 +153,7 @@ useEffect(() => {
                   font-semibold
                   transition-all
                   ${active
-                    ? 'bg-amber-900/70 text-white'
+                    ? 'bg-[#4A1F08]/70 text-white'
                     : 'text-zinc-300 hover:bg-white/10 hover:text-white'
                   }
                 `}

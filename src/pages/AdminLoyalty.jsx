@@ -170,7 +170,7 @@ export default function AdminLoyalty() {
             <button
               onClick={createReward}
               className="
-                bg-amber-900
+                bg-[#4A1F08]
                 text-white
                 rounded-xl
                 font-bold
@@ -220,7 +220,7 @@ export default function AdminLoyalty() {
                           {reward.description}
                         </p>
 
-                        <p className="font-bold text-amber-900 mt-3">
+                        <p className="font-bold text-[#4A1F08] mt-3">
                           {reward.points_required} pontos
                         </p>
                         <p className="text-xs font-bold text-zinc-500 uppercase mt-1">

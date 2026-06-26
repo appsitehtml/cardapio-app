@@ -528,7 +528,7 @@ const todayRevenue = orders
         border
         ${
           statusFilter === status.value
-            ? 'bg-amber-900 text-white border-amber-900'
+            ? 'bg-[#4A1F08] text-white border-[#4A1F08]'
             : 'bg-white text-zinc-600 border-zinc-200'
         }
       `}
@@ -548,7 +548,7 @@ const todayRevenue = orders
             onClick={() => setTab('active')}
             className={`px-4 py-2 rounded-xl text-white font-bold ${
               tab === 'active'
-                ? 'bg-amber-900 border border-amber-300 shadow-sm'
+                ? 'bg-[#4A1F08] border border-amber-300 shadow-sm'
                 : 'bg-zinc-200 text-zinc-500'
             }`}
           >
@@ -559,7 +559,7 @@ const todayRevenue = orders
             onClick={() => setTab('finished')}
             className={`px-4 py-2 rounded-xl text-white font-bold ${
               tab === 'finished'
-                ? 'bg-amber-900 border border-amber-300 shadow-sm'
+                ? 'bg-[#4A1F08] border border-amber-300 shadow-sm'
                 : 'bg-zinc-200 text-zinc-500'
             }`}
           >
@@ -676,7 +676,7 @@ const todayRevenue = orders
 </div>
 
               <div className="flex items-center justify-between mt-5 pt-4 border-t">
-                <p className="font-black text-2xl text-amber-900">
+                <p className="font-black text-2xl text-[#4A1F08]">
                   R$ {Number(order.total_amount).toFixed(2)}
                 </p>
 
@@ -705,7 +705,7 @@ const todayRevenue = orders
                   {order.status !== 'finalizado' && order.status !== 'cancelado' && (
                     <button
                       onClick={() => advanceStatus(order)}
-                      className="bg-amber-900 text-white px-4 py-2 rounded-xl text-sm font-bold transition-all hover:scale-105 active:scale-95"
+                      className="bg-[#4A1F08] text-white px-4 py-2 rounded-xl text-sm font-bold transition-all hover:scale-105 active:scale-95"
                     >
                       Avançar
                     </button>
@@ -857,7 +857,7 @@ const todayRevenue = orders
                   {!['finalizado', 'cancelado'].includes(selectedOrder.status) && (
   <button
     onClick={() => advanceStatus(selectedOrder)}
-    className="flex-1 bg-amber-900 text-white py-2 rounded-xl font-bold text-xs sm:text-sm"
+    className="flex-1 bg-[#4A1F08] text-white py-2 rounded-xl font-bold text-xs sm:text-sm"
   >
     Avançar Status
   </button>
