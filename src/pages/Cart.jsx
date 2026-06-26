@@ -34,6 +34,7 @@ export default function Cart() {
 const [phone, setPhone] = useState(localStorage.getItem('customer_phone') || '')
 const [address, setAddress] = useState(localStorage.getItem('customer_address') || '')
   const [notes, setNotes] = useState('')
+  const [checkoutStep, setCheckoutStep] = useState(1)
   const [paymentMethod, setPaymentMethod] = useState('pix')
   const [changeFor, setChangeFor] = useState('')
   const [couponCode, setCouponCode] = useState('')
@@ -52,6 +53,32 @@ useEffect(() => {
 
     return method || 'Não informado'
   }
+
+  function goNextStep() {
+  if (checkoutStep === 1 && cart.length === 0) {
+    toast.error('Seu carrinho está vazio')
+    return
+  }
+
+  if (checkoutStep === 2) {
+    if (!name.trim()) {
+      toast.error('Informe seu nome')
+      return
+    }
+
+    if (!phone.trim()) {
+      toast.error('Informe seu telefone')
+      return
+    }
+
+    if (!address.trim()) {
+      toast.error('Informe seu endereço')
+      return
+    }
+  }
+
+  setCheckoutStep(checkoutStep + 1)
+}
 
   async function applyCoupon() {
   if (!couponCode.trim()) {
@@ -138,6 +165,61 @@ async function loadRewards() {
   setAvailableRewards(available)
 }
 
+async function upsertCustomer() {
+  const cleanPhone = phone.trim()
+
+  if (!cleanPhone) return null
+
+  const { data: existingCustomer } = await supabase
+    .from('customers')
+    .select('*')
+    .eq('phone', cleanPhone)
+    .maybeSingle()
+
+  if (!existingCustomer) {
+    const { data: newCustomer, error } = await supabase
+      .from('customers')
+      .insert([
+        {
+          name,
+          phone: cleanPhone,
+          address,
+          total_orders: 1,
+          total_spent: finalTotal
+        }
+      ])
+      .select()
+      .single()
+
+    if (error) {
+      console.log('ERRO AO CRIAR CLIENTE:', error)
+      return null
+    }
+
+    return newCustomer
+  }
+
+  const { data: updatedCustomer, error } = await supabase
+    .from('customers')
+    .update({
+      name,
+      address,
+      total_orders: Number(existingCustomer.total_orders || 0) + 1,
+      total_spent: Number(existingCustomer.total_spent || 0) + Number(finalTotal || 0),
+      updated_at: new Date().toISOString()
+    })
+    .eq('phone', cleanPhone)
+    .select()
+    .single()
+
+  if (error) {
+    console.log('ERRO AO ATUALIZAR CLIENTE:', error)
+    return existingCustomer
+  }
+
+  return updatedCustomer
+}
+
   async function finishOrder(openWhatsApp = false) {
     if (cart.length === 0) {
   toast.error('Seu carrinho está vazio')
@@ -159,10 +241,12 @@ if (!address.trim()) {
   return
 }
 
+const customer = await upsertCustomer()
     const { data, error } = await supabase
       .from('orders')
       .insert([
         {
+  customer_id: customer?.id || null,
   customer_name: name,
   phone,
   address,
@@ -284,7 +368,7 @@ message += `\n\n*Total:* R$ ${finalTotal.toFixed(2)}`
   <div className="min-h-screen bg-[#faf4ee]">
 
     <header className="sticky top-0 z-40 bg-[#faf4ee]/95 backdrop-blur border-b border-zinc-200">
-      <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+      <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
 
         <Link to="/" className="text-xl font-black text-amber-900 tracking-wide">
           HORA BOA BURGER
@@ -333,10 +417,40 @@ message += `\n\n*Total:* R$ ${finalTotal.toFixed(2)}`
         Voltar
       </Link>
 
-      <h1 className="text-4xl font-black mb-6">
+      <h1 className="text-1xl font-black mb-4">
         FINALIZAR PEDIDO
       </h1>
 
+      <div className="grid grid-cols-4 gap-2 mb-4">
+  {[
+    { step: 1, label: 'Carrinho' },
+    { step: 2, label: 'Entrega' },
+    { step: 3, label: 'Pagamento' },
+    { step: 4, label: 'Confirmar' }
+  ].map(item => (
+    <button
+      key={item.step}
+      type="button"
+      onClick={() => setCheckoutStep(item.step)}
+      className={`
+        rounded-xl
+        py-2
+        text-xs
+        font-black
+        border
+        ${
+          checkoutStep === item.step
+            ? 'bg-amber-900 text-white border-amber-900'
+            : 'bg-white text-zinc-500 border-zinc-200'
+        }
+      `}
+    >
+      {item.step}. {item.label}
+    </button>
+  ))}
+</div>
+
+{checkoutStep === 1 && (
       <section className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-5 mb-6">
 
         <h2 className="text-xl font-black mb-4">
@@ -545,6 +659,9 @@ message += `\n\n*Total:* R$ ${finalTotal.toFixed(2)}`
         </div>
 
       </section>
+)}
+
+      {checkoutStep === 2 && (
 
       <section className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-5 mb-6">
 
@@ -588,6 +705,9 @@ message += `\n\n*Total:* R$ ${finalTotal.toFixed(2)}`
         </div>
 
       </section>
+      )}
+
+      {checkoutStep === 3 && (
 
       <section className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-5 mb-6">
 
@@ -655,6 +775,7 @@ message += `\n\n*Total:* R$ ${finalTotal.toFixed(2)}`
         )}
 
       </section>
+      )}
 
       <div className="
   fixed
@@ -697,20 +818,136 @@ message += `\n\n*Total:* R$ ${finalTotal.toFixed(2)}`
 
     </div>
 
+<div className="flex gap-3 mb-6">
+
+  {checkoutStep > 1 && (
     <button
-      onClick={() => finishOrder(false)}
-      disabled={cart.length === 0}
-      className="
-        w-full
-        bg-amber-900
-        text-white
-        py-4
-        rounded-2xl
-        font-bold
-      "
+      type="button"
+      onClick={() => setCheckoutStep(checkoutStep - 1)}
+      className="flex-1 bg-white border border-zinc-200 py-4 rounded-2xl font-bold"
     >
-      Confirmar Pedido
+      Voltar
     </button>
+  )}
+
+  {checkoutStep < 4 && (
+    <button
+      type="button"
+      onClick={goNextStep}
+      className="flex-1 bg-amber-900 text-white py-4 rounded-2xl font-bold"
+    >
+      Continuar
+    </button>
+  )}
+
+</div>
+
+{checkoutStep === 4 && (
+  <section className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-5 mb-6">
+
+    <h2 className="text-xl font-title mb-4">
+      RESUMO DO PEDIDO
+    </h2>
+
+    <div className="space-y-4">
+
+      <div>
+        <p className="text-xs font-black text-zinc-400 uppercase mb-2">
+          Itens
+        </p>
+
+        <div className="space-y-2">
+          {cart.map(item => (
+            <div
+              key={item.id}
+              className="flex justify-between text-sm"
+            >
+              <span>
+                {item.quantity}x {item.name}
+              </span>
+
+              <span className="font-bold">
+                R$ {(item.price * item.quantity).toFixed(2)}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="border-t pt-4">
+        <p className="text-xs font-black text-zinc-400 uppercase mb-2">
+          Entrega
+        </p>
+
+        <p className="font-bold">{name}</p>
+        <p className="text-sm text-zinc-500">{phone}</p>
+        <p className="text-sm text-zinc-500">{address}</p>
+
+        {notes && (
+          <p className="text-sm text-zinc-500 mt-2">
+            Obs: {notes}
+          </p>
+        )}
+      </div>
+
+      <div className="border-t pt-4">
+        <p className="text-xs font-black text-zinc-400 uppercase mb-2">
+          Pagamento
+        </p>
+
+        <p className="font-bold">
+          {paymentLabel(paymentMethod)}
+        </p>
+
+        {paymentMethod === 'dinheiro' && changeFor && (
+          <p className="text-sm text-zinc-500">
+            Troco para R$ {changeFor}
+          </p>
+        )}
+      </div>
+
+      <div className="border-t pt-4 space-y-2">
+        <div className="flex justify-between text-zinc-500">
+          <span>Subtotal</span>
+          <span>R$ {total.toFixed(2)}</span>
+        </div>
+
+        {discountAmount > 0 && (
+          <div className="flex justify-between text-green-600 font-bold">
+            <span>Desconto</span>
+            <span>-R$ {discountAmount.toFixed(2)}</span>
+          </div>
+        )}
+
+        {selectedReward && (
+          <div className="flex justify-between text-purple-700 font-bold">
+            <span>Recompensa</span>
+            <span>{selectedReward.name}</span>
+          </div>
+        )}
+
+        <div className="flex justify-between text-xl font-black pt-2 border-t">
+          <span>Total</span>
+          <span className="text-amber-900">
+            R$ {finalTotal.toFixed(2)}
+          </span>
+        </div>
+      </div>
+
+    </div>
+
+  </section>
+)}
+
+{checkoutStep === 4 && (
+  <button
+    onClick={() => finishOrder(false)}
+    disabled={cart.length === 0}
+    className="w-full bg-amber-900 text-white py-4 rounded-2xl font-bold text-lg"
+  >
+    Confirmar Pedido
+  </button>
+)}
 
   </div>
 

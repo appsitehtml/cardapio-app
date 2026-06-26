@@ -197,7 +197,7 @@ function addSelectedProductToCart() {
         return (
           <div
             key={banner.id}
-            className="min-w-full snap-center relative overflow-hidden rounded-3xl bg-white shadow border border-zinc-200"
+            className="min-w-full snap-center relative overflow-hidden rounded-3xl bg-white border border-zinc-200"
           >
             {banner.image_url && (
               <img
