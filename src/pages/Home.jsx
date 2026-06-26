@@ -189,21 +189,38 @@ function addSelectedProductToCart() {
     <div className="min-h-screen bg-[#faf4ee] pb-28">
 
       <header className="bg-[#faf4ee] border-b border-zinc-200 sticky top-0 z-50">
-  <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+  <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
 
     <Link to="/">
-  <img
-    src={logo}
-    alt="Hora Boa Burger"
-    className="h-9 w-auto"
-  />
-</Link>
+      <img
+        src={logo}
+        alt="Hora Boa"
+        className="h-8 w-auto"
+      />
+    </Link>
 
-    <div className="hidden md:flex items-center gap-4 text-sm text-zinc-600">
-      <Link to="/">Cardápio</Link>
-      <Link to="/my-orders">Pedidos</Link>
-      <Link to="/loyalty">Fidelidade</Link>
-      <Link to="/profile">Perfil</Link>
+    <div className="flex items-center gap-3">
+
+      <button
+        type="button"
+        className="w-10 h-10 rounded-full border border-zinc-200 bg-white flex items-center justify-center text-zinc-600"
+      >
+        <Search className="w-5 h-5" />
+      </button>
+
+      {cart.length > 0 && (
+        <Link
+          to="/cart"
+          className="relative w-10 h-10 rounded-full bg-amber-900 text-white flex items-center justify-center"
+        >
+          <ShoppingBag className="w-5 h-5" />
+
+          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-black rounded-full w-5 h-5 flex items-center justify-center">
+            {cartQuantity}
+          </span>
+        </Link>
+      )}
+
     </div>
 
   </div>
@@ -522,56 +539,6 @@ function addSelectedProductToCart() {
         )}
 
       </main>
-
-      {cart.length > 0 && (
-  <Link
-    to="/cart"
-    className="
-fixed
-bottom-24
-md:bottom-6
-left-1/2
--translate-x-1/2
-w-[92%]
-max-w-md
-z-50
-"
-  >
-    <div
-      className="
-        bg-amber-900
-        text-white
-        rounded-2xl
-        shadow-2xl
-        px-5
-        py-4
-        flex
-        items-center
-        justify-between
-        transition-all
-        hover:scale-[1.02]
-        active:scale-95
-      "
-    >
-      <div>
-
-        <p className="text-xs opacity-80">
-          {cartQuantity} {cartQuantity === 1 ? 'item' : 'itens'}
-        </p>
-
-        <p className="font-black text-lg">
-          R$ {cartTotal.toFixed(2)}
-        </p>
-
-      </div>
-
-      <div className="flex items-center gap-2 font-bold">
-        Ver carrinho →
-      </div>
-
-    </div>
-  </Link>
-)}
 
       {selectedProduct && (
   <div className="fixed inset-0 z-50 bg-black/50 flex items-end md:items-center justify-center p-4">
