@@ -185,7 +185,8 @@ async function upsertCustomer() {
           phone: cleanPhone,
           address,
           total_orders: 1,
-          total_spent: finalTotal
+          total_spent: finalTotal,
+          welcome_shown: false
         }
       ])
       .select()
@@ -196,7 +197,10 @@ async function upsertCustomer() {
       return null
     }
 
-    return newCustomer
+    return {
+      ...newCustomer,
+      isNew: true
+    }
   }
 
   const { data: updatedCustomer, error } = await supabase
@@ -214,10 +218,17 @@ async function upsertCustomer() {
 
   if (error) {
     console.log('ERRO AO ATUALIZAR CLIENTE:', error)
-    return existingCustomer
+
+    return {
+      ...existingCustomer,
+      isNew: false
+    }
   }
 
-  return updatedCustomer
+  return {
+    ...updatedCustomer,
+    isNew: false
+  }
 }
 
   async function finishOrder(openWhatsApp = false) {
@@ -314,6 +325,7 @@ items: cart
 localStorage.setItem('customer_name', name)
 localStorage.setItem('customer_address', address)
 
+
     if (openWhatsApp) {
       const itemsText = cart
         .map(item => `• ${item.quantity}x ${item.name} - R$ ${(item.price * item.quantity).toFixed(2)}`)
@@ -361,7 +373,24 @@ message += `\n\n*Total:* R$ ${finalTotal.toFixed(2)}`
     setPaymentMethod('pix')
     setChangeFor('')
 
-    navigate('/my-orders')
+    const customerSaved =
+  customer?.isNew && !customer.welcome_shown
+
+if (customerSaved) {
+  await supabase
+    .from('customers')
+    .update({
+      welcome_shown: true
+    })
+    .eq('id', customer.id)
+}
+
+navigate('/order-success', {
+  state: {
+    orderId: data?.id,
+    customerSaved
+  }
+})
   }
 
   return (
@@ -470,6 +499,25 @@ message += `\n\n*Total:* R$ ${finalTotal.toFixed(2)}`
                   {item.name}
                 </p>
 
+                {item.extras?.length > 0 && (
+  <div className="mt-1 space-y-0.5">
+    {item.extras.map(extra => (
+      <p
+        key={extra.id}
+        className="text-xs text-zinc-500"
+      >
+        + {extra.name} · R$ {Number(extra.price || 0).toFixed(2)}
+      </p>
+    ))}
+  </div>
+)}
+
+{item.note && (
+  <p className="text-xs text-zinc-500 mt-1">
+    Obs: {item.note}
+  </p>
+)}
+
                 <p className="text-sm text-zinc-500">
                   R$ {Number(item.price).toFixed(2)} cada
                 </p>
@@ -478,15 +526,37 @@ message += `\n\n*Total:* R$ ${finalTotal.toFixed(2)}`
               <div className="flex items-center gap-3">
 
                 <button
-                  onClick={() => removeFromCart(item.id)}
-                  className="w-8 h-8 rounded-full border flex items-center justify-center text-red-500 hover:bg-red-50"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+  onClick={() => removeFromCart(item.id)}
+  className="
+    w-10
+    h-10
+    rounded-full
+    bg-zinc-100
+    hover:bg-zinc-200
+    active:scale-95
+    transition-all
+    text-xl
+    font-bold
+  "
+>
+  −
+</button>
 
-                <span className="font-bold">
-                  {item.quantity}
-                </span>
+                <span>
+  {item.quantity}x {item.name}
+
+  {item.extras?.length > 0 && (
+    <span className="block text-xs text-zinc-500 mt-1">
+      {item.extras.map(extra => `+ ${extra.name}`).join(', ')}
+    </span>
+  )}
+
+  {item.note && (
+    <span className="block text-xs text-zinc-500">
+      Obs: {item.note}
+    </span>
+  )}
+</span>
 
                 <button
   onClick={() => addToCart(item)}
@@ -863,8 +933,20 @@ message += `\n\n*Total:* R$ ${finalTotal.toFixed(2)}`
               className="flex justify-between text-sm"
             >
               <span>
-                {item.quantity}x {item.name}
-              </span>
+  {item.quantity}x {item.name}
+
+  {item.extras?.length > 0 && (
+    <span className="block text-xs text-zinc-500 mt-1">
+      {item.extras.map(extra => `+ ${extra.name}`).join(', ')}
+    </span>
+  )}
+
+  {item.note && (
+    <span className="block text-xs text-amber-800 font-bold mt-1">
+      Obs: {item.note}
+    </span>
+  )}
+</span>
 
               <span className="font-bold">
                 R$ {(item.price * item.quantity).toFixed(2)}

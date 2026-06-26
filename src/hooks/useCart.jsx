@@ -51,12 +51,20 @@ export function CartProvider({ children }) {
     })
   }
 
-  function removeFromCart(productId) {
-
-  setCart(prev =>
-    prev.filter(item => item.id !== productId)
-  )
-}
+  function removeFromCart(id) {
+    setCart(prevCart =>
+      prevCart
+        .map(item =>
+          item.id === id
+            ? {
+                ...item,
+                quantity: item.quantity - 1
+              }
+            : item
+        )
+        .filter(item => item.quantity > 0)
+    )
+  }
 
 function clearCart() {
   setCart([])

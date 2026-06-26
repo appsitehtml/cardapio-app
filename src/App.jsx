@@ -14,6 +14,7 @@ import AdminMarketing from './pages/AdminMarketing'
 import Loyalty from './pages/Loyalty'
 import Profile from './pages/Profile'
 import AdminLoyalty from './pages/AdminLoyalty'
+import OrderSuccess from './pages/OrderSuccess'
 
 export default function App() {
   return (
@@ -22,6 +23,7 @@ export default function App() {
       <Route path="/" element={<Home />} />
       <Route path="/loyalty" element={<Loyalty />} />
       <Route path="/profile" element={<Profile />} />
+      <Route path="/order-success" element={<OrderSuccess />} />
       <Route path="/admin/loyalty" element={<AdminLoyalty />} />
       <Route
   path="/admin/marketing"

@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Search, ShoppingBag, Star } from 'lucide-react'
+import { Search, ShoppingBag, Star, ClipboardList, User } from 'lucide-react'
 
 import { supabase } from '../lib/supabase'
 import { useCart } from '../hooks/useCart.jsx'
+import logo from '../assets/logo.png'
 
 const categories = [
   'Todos',
@@ -24,6 +25,15 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState('Todos')
   const [selectedProduct, setSelectedProduct] = useState(null)
 const [quantity, setQuantity] = useState(1)
+const [itemNote, setItemNote] = useState('')
+const [productExtras, setProductExtras] = useState([])
+const [selectedExtras, setSelectedExtras] = useState([])
+const extrasTotal = selectedExtras.reduce(
+  (acc, extra) => acc + Number(extra.price || 0),
+  0
+)
+const productTotal =
+  ((Number(selectedProduct?.price || 0) + extrasTotal) * quantity)
 
   const { addToCart, cart } = useCart()
 
@@ -47,6 +57,17 @@ const [quantity, setQuantity] = useState(1)
     .order('display_order', { ascending: true })
 
   setBanners(data || [])
+}
+
+async function loadProductExtras(productId) {
+  const { data } = await supabase
+    .from('product_extras')
+    .select('*')
+    .eq('product_id', productId)
+    .eq('active', true)
+    .order('display_order', { ascending: true })
+
+  setProductExtras(data || [])
 }
 
 async function loadFeaturedProducts() {
@@ -88,6 +109,11 @@ async function loadFeaturedProducts() {
     0
   )
 
+  const cartTotal = cart.reduce(
+  (acc, item) => acc + item.price * item.quantity,
+  0
+)
+
   const filteredProducts = products.filter(product => {
     const term = search.toLowerCase()
 
@@ -106,11 +132,17 @@ async function loadFeaturedProducts() {
   function openProduct(product) {
   setSelectedProduct(product)
   setQuantity(1)
+  setItemNote('')
+  setSelectedExtras([])
+  loadProductExtras(product.id)
 }
 
 function closeProduct() {
   setSelectedProduct(null)
   setQuantity(1)
+  setItemNote('')
+  setProductExtras([])
+  setSelectedExtras([])
 }
 
 function goToBanner(index) {
@@ -135,8 +167,18 @@ function handleBannerScroll() {
 function addSelectedProductToCart() {
   if (!selectedProduct) return
 
+  const productToAdd = {
+  ...selectedProduct,
+
+  extras: selectedExtras,
+
+  note: itemNote.trim(),
+
+  price: Number(selectedProduct.price) + extrasTotal
+}
+
   for (let i = 0; i < quantity; i++) {
-    addToCart(selectedProduct)
+    addToCart(productToAdd)
   }
 
   closeProduct()
@@ -146,39 +188,28 @@ function addSelectedProductToCart() {
   return (
     <div className="min-h-screen bg-[#faf4ee] pb-28">
 
-      <header className="bg-amber-950 text-white px-4 py-4 rounded-b-2xl shadow-md">
-  <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">
+      <header className="bg-[#faf4ee] border-b border-zinc-200 sticky top-0 z-50">
+  <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
 
-    <div>
-      <h1 className="text-1xl font-title tracking-wide">
-        HORA BOA BURGER
-      </h1>
+    <Link to="/">
+  <img
+    src={logo}
+    alt="Hora Boa Burger"
+    className="h-9 w-auto"
+  />
+</Link>
 
-      <p className="text-xs text-amber-100">
-        Hambúrgueres artesanais e combos especiais
-      </p>
-    </div>
-
-    <div className="flex gap-2">
-      <Link
-        to="/my-orders"
-        className="bg-white/10 border border-white/20 px-3 py-2 rounded-full text-xs font-bold"
-      >
-        Pedidos
-      </Link>
-
-      <Link
-        to="/loyalty"
-        className="bg-white/10 border border-white/20 px-3 py-2 rounded-full text-xs font-bold"
-      >
-        Fidelidade
-      </Link>
+    <div className="hidden md:flex items-center gap-4 text-sm text-zinc-600">
+      <Link to="/">Cardápio</Link>
+      <Link to="/my-orders">Pedidos</Link>
+      <Link to="/loyalty">Fidelidade</Link>
+      <Link to="/profile">Perfil</Link>
     </div>
 
   </div>
 </header>
 
-      <main className="max-w-5xl mx-auto px-4 py-6">
+      <main className="max-w-5xl mx-auto px-4 py-5 pb-32">
 
         {banners.length > 0 && (
   <div className="mb-6">
@@ -293,17 +324,13 @@ function addSelectedProductToCart() {
         </div>
 
         {featuredProducts.length > 0 && (
-  <section className="mb-10">
+  <section className="mb-8">
 
-    <div className="flex items-center justify-between mb-4">
+  <h2 className="text-xl font-title mb-3">
+    ⭐ Destaques
+  </h2>
 
-      <h2 className="text-1xl font-title">
-        ⭐ Destaques
-      </h2>
-
-    </div>
-
-    <div className="flex gap-3 overflow-x-auto pb-2 md:grid md:grid-cols-3 md:overflow-visible">
+  <div className="flex gap-3 overflow-x-auto pb-2 hide-scrollbar md:grid md:grid-cols-3 md:overflow-visible">
 
       {featuredProducts.map(item => {
         const product = item.products
@@ -313,13 +340,12 @@ function addSelectedProductToCart() {
             key={item.id}
             onClick={() => openProduct(product)}
             className="
-  min-w-[145px]
-  max-w-[145px]
+  min-w-[140px]
+  max-w-[140px]
   md:min-w-0
   md:max-w-none
   bg-white
   rounded-2xl
-  md:rounded-3xl
   overflow-hidden
   border
   border-zinc-200
@@ -330,15 +356,15 @@ function addSelectedProductToCart() {
 
             {product.image_url && (
               <img
-                src={product.image_url}
-                alt={product.name}
-                className="w-full h-24 md:h-52 object-cover"
-              />
+  src={product.image_url}
+  alt={product.name}
+  className="w-full h-24 md:h-40 object-cover"
+/>
             )}
 
             <div className="p-2">
 
-              <h3 className="text-sm md:text-2xl font-black line-clamp-2">
+              <h3 className="text-sm font-black line-clamp-2">
                 {product.name}
               </h3>
 
@@ -348,7 +374,7 @@ function addSelectedProductToCart() {
 
               <div className="flex items-center justify-between mt-2">
 
-                <span className="text-sm md:text-2xl font-black text-amber-900">
+                <span className="text-sm font-black text-amber-900">
                   R$ {Number(product.price).toFixed(2)}
                 </span>
 
@@ -498,48 +524,65 @@ function addSelectedProductToCart() {
       </main>
 
       {cart.length > 0 && (
-        <Link
-          to="/cart"
-          className="
-            fixed
-            bottom-5
-            left-4
-            right-4
-            md:left-auto
-            md:right-6
-            md:w-auto
-            bg-amber-900
-            text-white
-            px-6
-            py-4
-            rounded-2xl
-            shadow-xl
-            font-bold
-            text-lg
-            flex
-            items-center
-            justify-center
-            gap-3
-            transition-all
-            hover:scale-[1.02]
-            active:scale-95
-          "
-        >
-          <ShoppingBag className="w-5 h-5" />
-          Ver carrinho · {cartQuantity}
-        </Link>
-      )}
+  <Link
+    to="/cart"
+    className="
+fixed
+bottom-24
+md:bottom-6
+left-1/2
+-translate-x-1/2
+w-[92%]
+max-w-md
+z-50
+"
+  >
+    <div
+      className="
+        bg-amber-900
+        text-white
+        rounded-2xl
+        shadow-2xl
+        px-5
+        py-4
+        flex
+        items-center
+        justify-between
+        transition-all
+        hover:scale-[1.02]
+        active:scale-95
+      "
+    >
+      <div>
+
+        <p className="text-xs opacity-80">
+          {cartQuantity} {cartQuantity === 1 ? 'item' : 'itens'}
+        </p>
+
+        <p className="font-black text-lg">
+          R$ {cartTotal.toFixed(2)}
+        </p>
+
+      </div>
+
+      <div className="flex items-center gap-2 font-bold">
+        Ver carrinho →
+      </div>
+
+    </div>
+  </Link>
+)}
 
       {selectedProduct && (
   <div className="fixed inset-0 z-50 bg-black/50 flex items-end md:items-center justify-center p-4">
 
-    <div className="bg-[#faf4ee] rounded-t-3xl md:rounded-3xl w-full max-w-md overflow-hidden shadow-2xl">
+    <div className="bg-[#faf4ee] rounded-t-3xl md:rounded-3xl w-full max-w-md max-h-[92vh] overflow-y-auto shadow-2xl">
 
       {selectedProduct.image_url && (
         <img
           src={selectedProduct.image_url}
           alt={selectedProduct.name}
-          className="w-full h-64 object-cover"
+          className="w-full h-44 md:h-56 object-cover"
         />
       )}
 
@@ -570,9 +613,83 @@ function addSelectedProductToCart() {
           {selectedProduct.description}
         </p>
 
-        <p className="text-3xl font-black text-amber-900 mt-5">
-          R$ {Number(selectedProduct.price || 0).toFixed(2)}
-        </p>
+        {productExtras.length > 0 && (
+  <div className="mt-5">
+
+    <p className="text-sm font-black mb-3">
+      Adicionais
+    </p>
+
+    <div className="space-y-2">
+      {productExtras.map(extra => {
+        const checked = selectedExtras.some(item => item.id === extra.id)
+
+        return (
+          <button
+            key={extra.id}
+            type="button"
+            onClick={() => {
+              if (checked) {
+                setSelectedExtras(prev =>
+                  prev.filter(item => item.id !== extra.id)
+                )
+              } else {
+                setSelectedExtras(prev => [...prev, extra])
+              }
+            }}
+            className={`
+              w-full
+              flex
+              items-center
+              justify-between
+              border
+              rounded-2xl
+              p-4
+              text-left
+              ${
+                checked
+                  ? 'border-amber-900 bg-amber-50'
+                  : 'border-zinc-200 bg-white'
+              }
+            `}
+          >
+            <div>
+              <p className="font-bold">
+                {extra.name}
+              </p>
+
+              <p className="text-sm text-zinc-500">
+                + R$ {Number(extra.price || 0).toFixed(2)}
+              </p>
+            </div>
+
+            <div
+              className={`
+                w-6
+                h-6
+                rounded-full
+                border
+                flex
+                items-center
+                justify-center
+                text-xs
+                font-black
+                ${
+                  checked
+                    ? 'bg-amber-900 text-white border-amber-900'
+                    : 'border-zinc-300'
+                }
+              `}
+            >
+              {checked ? '✓' : ''}
+            </div>
+          </button>
+        )
+      })}
+    </div>
+
+  </div>
+)}
 
         <div className="flex items-center justify-between mt-6">
 
@@ -604,23 +721,37 @@ function addSelectedProductToCart() {
 
         </div>
 
-        <button
-          onClick={addSelectedProductToCart}
+        <div className="mt-5">
+  <label className="block text-sm font-bold mb-2">
+    Observações do item
+  </label>
+
+  <textarea
+    value={itemNote}
+    onChange={(e) => setItemNote(e.target.value)}
+    placeholder="Ex: sem cebola, molho separado..."
+    className="w-full border border-zinc-200 rounded-2xl p-3 min-h-24 outline-none"
+  />
+</div>
+
+  <div className="sticky bottom-0 bg-[#faf4ee] pt-3 pb-4">
+  <button
+    onClick={addSelectedProductToCart}
           className="
-            mt-6
-            w-full
-            bg-amber-900
-            text-white
-            py-4
-            rounded-2xl
-            font-bold
-            text-lg
-            transition-all
-            active:scale-95
-          "
-        >
-          Adicionar · R$ {(Number(selectedProduct.price || 0) * quantity).toFixed(2)}
-        </button>
+      w-full
+      bg-amber-900
+      text-white
+      py-4
+      rounded-2xl
+      font-bold
+      text-lg
+      transition-all
+      active:scale-95
+    "
+  >
+    Adicionar · R$ {productTotal.toFixed(2)}
+  </button>
+</div>
 
       </div>
 
@@ -628,6 +759,32 @@ function addSelectedProductToCart() {
 
   </div>
 )}
+
+<nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#faf4ee] border-t border-zinc-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
+  <div className="grid grid-cols-4 py-2">
+
+    <Link to="/" className="flex flex-col items-center gap-1 text-amber-900 text-xs font-bold">
+      <ShoppingBag className="w-5 h-5" />
+      Cardápio
+    </Link>
+
+    <Link to="/my-orders" className="flex flex-col items-center gap-1 text-zinc-500 text-xs font-bold">
+      <ClipboardList className="w-5 h-5" />
+      Pedidos
+    </Link>
+
+    <Link to="/loyalty" className="flex flex-col items-center gap-1 text-zinc-500 text-xs font-bold">
+      <Star className="w-5 h-5" />
+      Fidelidade
+    </Link>
+
+    <Link to="/profile" className="flex flex-col items-center gap-1 text-zinc-500 text-xs font-bold">
+      <User className="w-5 h-5" />
+      Perfil
+    </Link>
+
+  </div>
+</nav>
 
     </div>
   )

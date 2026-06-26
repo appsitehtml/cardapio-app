@@ -637,14 +637,43 @@ const todayRevenue = orders
                 </div>
               </div>
 
-              <div className="mt-4 space-y-2">
-                {order.items?.map((item, index) => (
-                  <div key={index} className="flex justify-between text-sm">
-                    <span>{item.quantity}x {item.name}</span>
-                    <span>R$ {(item.price * item.quantity).toFixed(2)}</span>
-                  </div>
-                ))}
-              </div>
+              <div className="mt-4 space-y-3">
+  {order.items?.map((item, index) => (
+    <div
+      key={index}
+      className="flex justify-between gap-4 text-sm"
+    >
+      <div>
+        <p className="font-bold">
+          {item.quantity}x {item.name}
+        </p>
+
+        {item.extras?.length > 0 && (
+          <div className="mt-1 space-y-0.5">
+            {item.extras.map(extra => (
+              <p
+                key={extra.id}
+                className="text-xs text-zinc-500"
+              >
+                + {extra.name}
+              </p>
+            ))}
+          </div>
+        )}
+
+        {item.note && (
+          <p className="text-xs text-amber-800 font-bold mt-1">
+            Obs: {item.note}
+          </p>
+        )}
+      </div>
+
+      <span className="font-bold whitespace-nowrap">
+        R$ {(item.price * item.quantity).toFixed(2)}
+      </span>
+    </div>
+  ))}
+</div>
 
               <div className="flex items-center justify-between mt-5 pt-4 border-t">
                 <p className="font-black text-2xl text-amber-900">

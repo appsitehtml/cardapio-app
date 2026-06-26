@@ -56,7 +56,7 @@ export default function MyOrders() {
   }
 
   function estimatedTime(status) {
-    if (status === 'recebido') return '30-40 min'
+    if (status === 'recebido') return '30-50 min'
     if (status === 'preparando') return '15-25 min'
     if (status === 'entrega') return '5-10 min'
     if (status === 'finalizado') return 'Pedido concluído'

@@ -29,6 +29,12 @@ export default function AdminProducts() {
   const [editCategory, setEditCategory] = useState('Hambúrgueres')
   const [categoryFilter, setCategoryFilter] = useState('Todos')
 
+  const [extras, setExtras] = useState([])
+const [extraProductId, setExtraProductId] = useState('')
+const [extraName, setExtraName] = useState('')
+const [extraPrice, setExtraPrice] = useState('')
+const [extraOrder, setExtraOrder] = useState('')
+
   async function loadProducts() {
     const { data } = await supabase
       .from('products')
@@ -40,6 +46,7 @@ export default function AdminProducts() {
 
   useEffect(() => {
     loadProducts()
+    loadExtras()
   }, [])
 
   async function uploadImage() {
@@ -65,6 +72,65 @@ export default function AdminProducts() {
 
     return data.publicUrl
   }
+
+  async function loadExtras() {
+  const { data } = await supabase
+    .from('product_extras')
+    .select(`
+      *,
+      products (
+        name
+      )
+    `)
+    .order('display_order', { ascending: true })
+
+  setExtras(data || [])
+}
+
+async function createExtra() {
+  if (!extraProductId) return
+  if (!extraName.trim()) return
+
+  await supabase
+    .from('product_extras')
+    .insert([
+      {
+        product_id: Number(extraProductId),
+        name: extraName,
+        price: Number(extraPrice || 0),
+        display_order: Number(extraOrder || 0),
+        active: true
+      }
+    ])
+
+  setExtraProductId('')
+  setExtraName('')
+  setExtraPrice('')
+  setExtraOrder('')
+
+  loadExtras()
+}
+
+async function toggleExtra(extra) {
+  await supabase
+    .from('product_extras')
+    .update({ active: !extra.active })
+    .eq('id', extra.id)
+
+  loadExtras()
+}
+
+async function deleteExtra(id) {
+  const confirmDelete = window.confirm('Excluir este adicional?')
+  if (!confirmDelete) return
+
+  await supabase
+    .from('product_extras')
+    .delete()
+    .eq('id', id)
+
+  loadExtras()
+}
 
   async function createProduct() {
     if (!name.trim()) return
@@ -392,6 +458,139 @@ export default function AdminProducts() {
   ))}
 
 </div>
+
+<div className="bg-white border border-zinc-200 p-5 rounded-3xl shadow-sm mb-6">
+
+  <h2 className="text-xl font-title mb-4">
+    Adicionais dos Produtos
+  </h2>
+
+  <div className="grid gap-3 md:grid-cols-5">
+
+    <select
+      value={extraProductId}
+      onChange={(e) => setExtraProductId(e.target.value)}
+      className="w-full border border-zinc-200 p-4 rounded-2xl shadow-sm"
+    >
+      <option value="">
+        Produto
+      </option>
+
+      {products.map(product => (
+        <option
+          key={product.id}
+          value={product.id}
+        >
+          {product.name}
+        </option>
+      ))}
+    </select>
+
+    <input
+      value={extraName}
+      onChange={(e) => setExtraName(e.target.value)}
+      placeholder="Nome. Ex: Bacon"
+      className="w-full border border-zinc-200 p-4 rounded-2xl shadow-sm"
+    />
+
+    <input
+      type="number"
+      value={extraPrice}
+      onChange={(e) => setExtraPrice(e.target.value)}
+      placeholder="Preço"
+      className="w-full border border-zinc-200 p-4 rounded-2xl shadow-sm"
+    />
+
+    <input
+      type="number"
+      value={extraOrder}
+      onChange={(e) => setExtraOrder(e.target.value)}
+      placeholder="Ordem"
+      className="w-full border border-zinc-200 p-4 rounded-2xl shadow-sm"
+    />
+
+    <button
+      onClick={createExtra}
+      className="
+        bg-amber-900
+        text-white
+        rounded-2xl
+        font-bold
+        transition-all
+        hover:scale-[1.02]
+        active:scale-95
+      "
+    >
+      Adicionar
+    </button>
+
+  </div>
+
+</div>
+
+{extras.length > 0 && (
+  <div className="bg-white border border-zinc-200 rounded-3xl shadow-sm mb-8 overflow-hidden">
+
+    <div className="p-5 border-b">
+      <h2 className="text-xl font-title">
+        Adicionais Cadastrados
+      </h2>
+    </div>
+
+    <div className="divide-y">
+
+      {extras.map(extra => (
+        <div
+          key={extra.id}
+          className="p-4 flex items-center justify-between gap-4"
+        >
+
+          <div>
+            <p className="font-black">
+              {extra.name}
+            </p>
+
+            <p className="text-sm text-zinc-500">
+              {extra.products?.name || 'Produto'} · R$ {Number(extra.price || 0).toFixed(2)} · Ordem {extra.display_order}
+            </p>
+          </div>
+
+          <div className="flex gap-2">
+
+            <button
+              onClick={() => toggleExtra(extra)}
+              className={`
+                px-4
+                py-2
+                rounded-xl
+                font-bold
+                border
+                ${
+                  extra.active
+                    ? 'bg-zinc-100 text-zinc-700'
+                    : 'bg-green-600 text-white border-green-600'
+                }
+              `}
+            >
+              {extra.active ? 'Desativar' : 'Ativar'}
+            </button>
+
+            <button
+              onClick={() => deleteExtra(extra.id)}
+              className="px-4 py-2 rounded-xl font-bold border border-red-200 text-red-600 hover:bg-red-50"
+            >
+              Excluir
+            </button>
+
+          </div>
+
+        </div>
+      ))}
+
+    </div>
+
+  </div>
+)}
 
         <div className="grid md:grid-cols-3 gap-6">
 
