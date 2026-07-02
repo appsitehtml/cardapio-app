@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Search, ShoppingBag, Star, ClipboardList, User } from 'lucide-react'
+import ProductModal from '../components/home/ProductModal'
 
 import { supabase } from '../lib/supabase'
 import { useCart } from '../hooks/useCart.jsx'
+import BottomNavigation from '../components/home/BottomNavigation'
+import ProductCard from '../components/home/ProductCard'
 import logo from '../assets/logo.png'
 
 const categories = [
@@ -448,83 +451,12 @@ function addSelectedProductToCart() {
           <div className="grid gap-4 md:grid-cols-3">
 
             {filteredProducts.map(product => (
-              <div
-  key={product.id}
-  onClick={() => openProduct(product)}
-  className="
-    bg-[#FFFCF7]
-    rounded-xl
-    border
-    border-[#E7DED5]
-    overflow-hidden
-    cursor-pointer
-  "
->
- <div className="h-[200px] overflow-hidden">
-  {product.image_url ? (
-    <img
-      src={product.image_url}
-      alt={product.name}
-      className="w-full h-full object-cover"
-    />
-  ) : (
-    <div className="w-full h-full flex items-center justify-center text-zinc-400 text-sm font-bold">
-      Sem imagem
-    </div>
-  )}
-</div>
-
-  <div className="p-4">
-
-    <div className="flex items-start justify-between gap-3">
-      <h3 className="text-[17px] font-black text-[#2B211B] leading-tight">
-        {product.name}
-      </h3>
-
-      <p className="text-[17px] font-black text-[#4A1E05] whitespace-nowrap">
-        R$ {Number(product.price || 0).toFixed(2)}
-      </p>
-    </div>
-
-    <p className="text-[15px] text-[#8A7465] mt-3 leading-5 line-clamp-2 min-h-[40px]">
-      {product.description}
-    </p>
-
-    <button
-      onClick={(e) => {
-        e.stopPropagation()
-        openProduct(product)
-      }}
-      className="
-        mt-4
-        w-full
-        h-[34px]
-        bg-[#4A1E05]
-        text-white
-        rounded-lg
-        font-bold
-        text-sm
-        flex
-        items-center
-        justify-center
-        gap-3
-        active:scale-95
-        transition-all
-      "
-    >
-      <span className="text-xl leading-none font-normal">
-        +
-      </span>
-
-      <span>
-        Adicionar
-      </span>
-    </button>
-
-  </div>
-</div>
-
-            ))}
+  <ProductCard
+    key={product.id}
+    product={product}
+    onOpen={openProduct}
+  />
+))}
 
           </div>
         )}
@@ -532,223 +464,22 @@ function addSelectedProductToCart() {
       </main>
 
       {selectedProduct && (
-  <div className="fixed inset-0 z-50 bg-black/50 flex items-end md:items-center justify-center p-4">
-
-    <div className="fixed inset-0 z-50 bg-[#faf4ee]">
-
-  <div className="h-full overflow-y-auto pb-28">
-
-      {selectedProduct.image_url && (
-        <img
-          src={selectedProduct.image_url}
-          alt={selectedProduct.name}
-          className="w-full h-44 md:h-56 object-cover"
-        />
-      )}
-
-      <div className="px-6 py-5">
-
-        <div className="flex items-start justify-between gap-4">
-
-          <div>
-            <p className="text-xs text-[#4A1F08] font-black uppercase">
-              {selectedProduct.category || 'Produto'}
-            </p>
-
-            <h2 className="text-3xl font-black mt-1">
-              {selectedProduct.name}
-            </h2>
-          </div>
-
-          <button
-  onClick={closeProduct}
-  className="absolute top-4 right-4 bg-white/90 border rounded-full w-10 h-10 font-black z-[70]"
->
-  ×
-</button>
-
-        </div>
-
-        <p className="text-zinc-600 mt-3">
-          {selectedProduct.description}
-        </p>
-
-        {productExtras.length > 0 && (
-  <div className="mt-5">
-
-    <p className="text-sm font-black mb-3">
-      Adicionais
-    </p>
-
-    <div className="space-y-2">
-      {productExtras.map(extra => {
-        const checked = selectedExtras.some(item => item.id === extra.id)
-
-        return (
-          <button
-            key={extra.id}
-            type="button"
-            onClick={() => {
-              if (checked) {
-                setSelectedExtras(prev =>
-                  prev.filter(item => item.id !== extra.id)
-                )
-              } else {
-                setSelectedExtras(prev => [...prev, extra])
-              }
-            }}
-            className={`
-              w-full
-              flex
-              items-center
-              justify-between
-              border
-              rounded-2xl
-              p-4
-              text-left
-              ${
-                checked
-                  ? 'border-amber-900 bg-amber-50'
-                  : 'border-zinc-200 bg-white'
-              }
-            `}
-          >
-            <div>
-  <p className="font-bold">
-    {extra.name}
-  </p>
-
-  <p className="text-sm text-zinc-500">
-    + R$ {Number(extra.price || 0).toFixed(2)}
-  </p>
-</div>
-
-            <div
-              className={`
-                w-6
-                h-6
-                rounded-full
-                border
-                flex
-                items-center
-                justify-center
-                text-xs
-                font-black
-                ${
-                  checked
-                    ? 'bg-[#4A1F08] text-white border-[#4A1F08]'
-                    : 'border-zinc-300'
-                }
-              `}
-            >
-              {checked ? '✓' : ''}
-            </div>
-          </button>
-        )
-      })}
-    </div>
-
-  </div>
-)}
-
-    </div>
-
-        <div className="mt-6">
-  <label className="block text-sm font-bold mb-2">
-    Observações do item
-  </label>
-
-  <textarea
-    value={itemNote}
-    onChange={(e) => setItemNote(e.target.value)}
-    placeholder="Ex: sem cebola, molho separado..."
-    className="w-full border border-zinc-200 rounded-2xl p-3 min-h-24 outline-none"
+  <ProductModal
+    product={selectedProduct}
+    productExtras={productExtras}
+    selectedExtras={selectedExtras}
+    setSelectedExtras={setSelectedExtras}
+    quantity={quantity}
+    setQuantity={setQuantity}
+    itemNote={itemNote}
+    setItemNote={setItemNote}
+    productTotal={productTotal}
+    onClose={closeProduct}
+    onAdd={addSelectedProductToCart}
   />
-</div>
-
-  <div className="fixed bottom-0 left-0 right-0 z-[60] bg-[#faf4ee] border-t border-zinc-200 p-4">
-
-  <div className="max-w-5xl mx-auto flex items-center gap-3">
-
-    <div className="flex items-center gap-3 bg-white border border-zinc-200 rounded-2xl px-3 py-2">
-
-      <button
-        type="button"
-        onClick={() => setQuantity(Math.max(quantity - 1, 1))}
-        className="w-9 h-9 rounded-full bg-zinc-100 font-black"
-      >
-        -
-      </button>
-
-      <span className="font-black text-lg w-6 text-center">
-        {quantity}
-      </span>
-
-      <button
-        type="button"
-        onClick={() => setQuantity(quantity + 1)}
-        className="w-9 h-9 rounded-full bg-zinc-100 font-black"
-      >
-        +
-      </button>
-
-    </div>
-
-    <button
-      onClick={addSelectedProductToCart}
-      className="
-        flex-1
-        bg-[#4A1F08]
-        text-white
-        py-4
-        rounded-2xl
-        font-bold
-        text-base
-        transition-all
-        active:scale-95
-      "
-    >
-      Adicionar · R$ {productTotal.toFixed(2)}
-    </button>
-
-  </div>
-
-</div>
-
-      </div>
-
-    </div>
-
-  </div>
 )}
 
-{!selectedProduct && (
-  <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#faf4ee] border-t border-zinc-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
-  <div className="grid grid-cols-4 py-2">
-
-    <Link to="/" className="flex flex-col items-center gap-1 text-[#4A1F08] text-xs font-bold">
-      <ShoppingBag className="w-5 h-5" />
-      Cardápio
-    </Link>
-
-    <Link to="/my-orders" className="flex flex-col items-center gap-1 text-zinc-500 text-xs font-bold">
-      <ClipboardList className="w-5 h-5" />
-      Pedidos
-    </Link>
-
-    <Link to="/loyalty" className="flex flex-col items-center gap-1 text-zinc-500 text-xs font-bold">
-      <Star className="w-5 h-5" />
-      Fidelidade
-    </Link>
-
-    <Link to="/profile" className="flex flex-col items-center gap-1 text-zinc-500 text-xs font-bold">
-      <User className="w-5 h-5" />
-      Perfil
-    </Link>
-
-  </div>
-</nav>
-)}
+{!selectedProduct && <BottomNavigation />}
 
     </div>
   )

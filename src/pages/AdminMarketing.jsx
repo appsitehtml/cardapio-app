@@ -22,6 +22,10 @@ const [products, setProducts] = useState([])
 const [featuredProducts, setFeaturedProducts] = useState([])
 const [featuredProductId, setFeaturedProductId] = useState('')
 const [featuredOrder, setFeaturedOrder] = useState('')
+const [validUntil, setValidUntil] = useState('')
+const [maxUses, setMaxUses] = useState('')
+const [minimumOrder, setMinimumOrder] = useState('')
+const [firstOrderOnly, setFirstOrderOnly] = useState(false)
 
   async function loadCoupons() {
     const { data } = await supabase
@@ -118,16 +122,24 @@ async function deleteFeaturedProduct(id) {
       .from('coupons')
       .insert([
         {
-          code: code.trim().toUpperCase(),
-          discount_type: discountType,
-          discount_value: discountValue,
-          active: true
-        }
+  code: code.trim().toUpperCase(),
+  discount_type: discountType,
+  discount_value: Number(discountValue || 0),
+  active: true,
+  valid_until: validUntil || null,
+  max_uses: maxUses ? Number(maxUses) : null,
+  minimum_order: Number(minimumOrder || 0),
+  first_order_only: firstOrderOnly
+}
       ])
 
     setCode('')
     setDiscountType('percentage')
     setDiscountValue('')
+    setValidUntil('')
+setMaxUses('')
+setMinimumOrder('')
+setFirstOrderOnly(false)
 
     loadCoupons()
   }
@@ -345,6 +357,38 @@ loadFeaturedProducts()
                 className="border border-zinc-200 rounded-xl p-3 shadow-sm"
               />
 
+              <input
+  type="datetime-local"
+  value={validUntil}
+  onChange={(e) => setValidUntil(e.target.value)}
+  className="border border-zinc-200 rounded-xl p-3 shadow-sm"
+/>
+
+<input
+  type="number"
+  value={maxUses}
+  onChange={(e) => setMaxUses(e.target.value)}
+  placeholder="Máximo de usos"
+  className="border border-zinc-200 rounded-xl p-3 shadow-sm"
+/>
+
+<input
+  type="number"
+  value={minimumOrder}
+  onChange={(e) => setMinimumOrder(e.target.value)}
+  placeholder="Pedido mínimo"
+  className="border border-zinc-200 rounded-xl p-3 shadow-sm"
+/>
+
+<label className="flex items-center gap-2 border border-zinc-200 rounded-xl p-3 shadow-sm font-bold text-sm">
+  <input
+    type="checkbox"
+    checked={firstOrderOnly}
+    onChange={(e) => setFirstOrderOnly(e.target.checked)}
+  />
+  Apenas 1º pedido
+</label>
+
               <button
                 onClick={createCoupon}
                 className="
@@ -469,6 +513,24 @@ loadFeaturedProducts()
             ))}
 
           </div>
+
+          <button
+  onClick={createCoupon}
+  className="
+    mt-4
+    bg-amber-900
+    text-white
+    rounded-xl
+    px-6
+    py-3
+    font-bold
+    transition-all
+    hover:scale-105
+    active:scale-95
+  "
+>
+  Criar Cupom
+</button>
         </>
       )}
 
