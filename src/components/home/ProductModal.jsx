@@ -9,7 +9,8 @@ export default function ProductModal({
   setItemNote,
   productTotal,
   onClose,
-  onAdd
+  onAdd,
+  disabled = false
 }) {
   if (!product) return null
 
@@ -147,11 +148,30 @@ export default function ProductModal({
           </div>
 
           <button
-            onClick={onAdd}
-            className="flex-1 bg-[#4A1F08] text-white py-4 rounded-2xl font-bold text-base transition-all active:scale-95"
-          >
-            Adicionar · R$ {productTotal.toFixed(2)}
-          </button>
+  disabled={disabled}
+  onClick={() => {
+    if (disabled) return
+    onAdd()
+  }}
+  className={`
+    flex-1
+    py-4
+    rounded-2xl
+    font-bold
+    text-base
+    transition-all
+    ${
+      disabled
+        ? 'bg-zinc-300 text-zinc-500 cursor-not-allowed'
+        : 'bg-[#4A1F08] text-white active:scale-95'
+    }
+  `}
+>
+  {disabled
+    ? 'Loja fechada'
+    : `Adicionar · R$ ${productTotal.toFixed(2)}`
+  }
+</button>
 
         </div>
       </div>

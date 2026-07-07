@@ -1,7 +1,8 @@
 export default function FeaturedSection({
   featuredProducts,
   onOpenProduct,
-  onAddToCart
+  onAddToCart,
+  disabled = false
 }) {
   if (featuredProducts.length === 0) return null
 
@@ -20,7 +21,10 @@ export default function FeaturedSection({
           return (
             <div
               key={item.id}
-              onClick={() => onOpenProduct(product)}
+              onClick={() => {
+  if (disabled) return
+  onOpenProduct(product)
+}}
               className="
                 flex-none
                 w-[145px]
@@ -60,23 +64,29 @@ export default function FeaturedSection({
                   </span>
 
                   <button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      onAddToCart(product)
-                    }}
-                    className="
-                      bg-[#5A2100]
-                      text-white
-                      w-9
-                      h-9
-                      rounded-full
-                      font-black
-                      shadow-lg
-                      active:scale-95
-                    "
-                  >
-                    +
-                  </button>
+  disabled={disabled}
+  onClick={(e) => {
+    e.stopPropagation()
+
+    if (disabled) return
+
+    onAddToCart(product)
+  }}
+  className={`
+    w-9
+    h-9
+    rounded-full
+    font-black
+    shadow-lg
+    ${
+      disabled
+        ? 'bg-zinc-300 text-zinc-500 cursor-not-allowed'
+        : 'bg-[#5A2100] text-white active:scale-95'
+    }
+  `}
+>
+  {disabled ? '×' : '+'}
+</button>
 
                 </div>
 

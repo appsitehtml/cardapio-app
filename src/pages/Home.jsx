@@ -10,6 +10,12 @@ import Header from '../components/home/Header'
 import BottomNavigation from '../components/home/BottomNavigation'
 import ProductCard from '../components/home/ProductCard'
 import logo from '../assets/logo.png'
+import StoreStatusBar from '../components/home/StoreStatusBar'
+import {
+  getStoreHours,
+  getStoreStatus,
+  formatStoreHours
+} from '../services/storeStatusService'
 
 const categories = [
   'Todos',
@@ -31,6 +37,8 @@ export default function Home() {
   const [selectedProduct, setSelectedProduct] = useState(null)
 const [quantity, setQuantity] = useState(1)
 const [itemNote, setItemNote] = useState('')
+const [storeStatus, setStoreStatus] = useState(null)
+const [storeHours, setStoreHours] = useState([])
 const [productExtras, setProductExtras] = useState([])
 const [selectedExtras, setSelectedExtras] = useState([])
 const extrasTotal = selectedExtras.reduce(
@@ -75,6 +83,13 @@ async function loadProductExtras(productId) {
   setProductExtras(data || [])
 }
 
+async function loadStoreStatus() {
+  const hours = await getStoreHours()
+
+  setStoreHours(formatStoreHours(hours))
+  setStoreStatus(getStoreStatus(hours))
+}
+
 async function loadFeaturedProducts() {
   const { data } = await supabase
     .from('featured_products')
@@ -89,10 +104,19 @@ async function loadFeaturedProducts() {
 }
 
   useEffect(() => {
-    loadProducts()
-    loadBanners()
-    loadFeaturedProducts()
-  }, [])
+  loadProducts()
+  loadBanners()
+  loadFeaturedProducts()
+  loadStoreStatus()
+}, [])
+
+useEffect(() => {
+  const timer = setInterval(() => {
+    loadStoreStatus()
+  }, 60000)
+
+  return () => clearInterval(timer)
+}, [])
 
  useEffect(() => {
   if (banners.length <= 1) return
@@ -202,6 +226,11 @@ function addSelectedProductToCart() {
 
       <main className="max-w-5xl mx-auto px-4 py-5 pb-32">
 
+        <StoreStatusBar
+  storeStatus={storeStatus}
+  storeHours={storeHours}
+/>
+
 <BannerCarousel
   banners={banners}
   bannerRef={bannerRef}
@@ -214,6 +243,7 @@ function addSelectedProductToCart() {
   featuredProducts={featuredProducts}
   onOpenProduct={openProduct}
   onAddToCart={addToCart}
+  disabled={!storeStatus?.isOpen}
 />
 
         <div className="flex gap-2 overflow-x-auto mb-6 pb-1">
@@ -252,10 +282,11 @@ function addSelectedProductToCart() {
 
             {filteredProducts.map(product => (
   <ProductCard
-    key={product.id}
-    product={product}
-    onOpen={openProduct}
-  />
+  key={product.id}
+  product={product}
+  onOpen={openProduct}
+  disabled={!storeStatus?.isOpen}
+/>
 ))}
 
           </div>
@@ -265,18 +296,19 @@ function addSelectedProductToCart() {
 
       {selectedProduct && (
   <ProductModal
-    product={selectedProduct}
-    productExtras={productExtras}
-    selectedExtras={selectedExtras}
-    setSelectedExtras={setSelectedExtras}
-    quantity={quantity}
-    setQuantity={setQuantity}
-    itemNote={itemNote}
-    setItemNote={setItemNote}
-    productTotal={productTotal}
-    onClose={closeProduct}
-    onAdd={addSelectedProductToCart}
-  />
+  product={selectedProduct}
+  productExtras={productExtras}
+  selectedExtras={selectedExtras}
+  setSelectedExtras={setSelectedExtras}
+  quantity={quantity}
+  setQuantity={setQuantity}
+  itemNote={itemNote}
+  setItemNote={setItemNote}
+  productTotal={productTotal}
+  onClose={closeProduct}
+  onAdd={addSelectedProductToCart}
+  disabled={!storeStatus?.isOpen}
+/>
 )}
 
 {!selectedProduct && <BottomNavigation />}

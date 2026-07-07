@@ -1,4 +1,4 @@
-export default function ProductCard({ product, onOpen }) {
+export default function ProductCard({ product, onOpen, disabled = false }) {
   return (
     <div
       onClick={() => onOpen(product)}
@@ -41,35 +41,38 @@ export default function ProductCard({ product, onOpen }) {
         </p>
 
         <button
-          onClick={(e) => {
-            e.stopPropagation()
-            onOpen(product)
-          }}
-          className="
-            mt-4
-            w-full
-            h-[34px]
-            bg-[#4A1E05]
-            text-white
-            rounded-lg
-            font-bold
-            text-sm
-            flex
-            items-center
-            justify-center
-            gap-3
-            active:scale-95
-            transition-all
-          "
-        >
-          <span className="text-xl leading-none font-normal">
-            +
-          </span>
+  disabled={disabled}
+  onClick={() => {
+  if (disabled) return
+  onOpen(product)
+}}
+  className={`
+    mt-4
+    w-full
+    h-[34px]
+    rounded-lg
+    font-bold
+    text-sm
+    flex
+    items-center
+    justify-center
+    gap-3
+    transition-all
+    ${
+      disabled
+        ? 'bg-zinc-300 text-zinc-500 cursor-not-allowed'
+        : 'bg-[#4A1E05] text-white active:scale-95'
+    }
+  `}
+>
+  <span className="text-xl leading-none font-normal">
+    {disabled ? '×' : '+'}
+  </span>
 
-          <span>
-            Adicionar
-          </span>
-        </button>
+  <span>
+    {disabled ? 'Fechado' : 'Adicionar'}
+  </span>
+</button>
       </div>
     </div>
   )
