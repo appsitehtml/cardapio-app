@@ -16,6 +16,7 @@ import Profile from './pages/Profile'
 import AdminLoyalty from './pages/AdminLoyalty'
 import OrderSuccess from './pages/OrderSuccess'
 import AdminStoreHours from './pages/AdminStoreHours'
+import AdminStore from './pages/AdminStore'
 
 export default function App() {
   return (
@@ -27,6 +28,7 @@ export default function App() {
       <Route path="/order-success" element={<OrderSuccess />} />
       <Route path="/admin/loyalty" element={<AdminLoyalty />} />
       <Route path="/admin/horarios" element={<AdminStoreHours />} />
+      <Route path="/admin/loja" element={<AdminStore />} />
       <Route
   path="/admin/marketing"
   element={

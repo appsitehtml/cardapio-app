@@ -9,6 +9,7 @@ import BannerCarousel from '../components/home/BannerCarousel'
 import Header from '../components/home/Header'
 import BottomNavigation from '../components/home/BottomNavigation'
 import ProductCard from '../components/home/ProductCard'
+import { getStoreSettings } from '../services/storeSettingsService'
 import logo from '../assets/logo.png'
 import StoreStatusBar from '../components/home/StoreStatusBar'
 import {
@@ -85,9 +86,10 @@ async function loadProductExtras(productId) {
 
 async function loadStoreStatus() {
   const hours = await getStoreHours()
+  const settings = await getStoreSettings()
 
   setStoreHours(formatStoreHours(hours))
-  setStoreStatus(getStoreStatus(hours))
+  setStoreStatus(getStoreStatus(hours, settings))
 }
 
 async function loadFeaturedProducts() {

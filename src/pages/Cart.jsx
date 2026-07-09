@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-
+import { getStoreSettings } from '../services/storeSettingsService'
 import { useCart } from '../hooks/useCart.jsx'
 import { upsertCustomer } from '../services/customerService'
 import { createOrder } from '../services/orderService'
@@ -58,11 +58,21 @@ export default function Cart() {
 
   const [availableRewards, setAvailableRewards] = useState([])
   const [selectedReward, setSelectedReward] = useState(null)
+  const [storeSettings, setStoreSettings] = useState(null)
 
   const [formErrors, setFormErrors] = useState({})
   const [orderError, setOrderError] = useState('')
 
   const finalTotal = Math.max(total - discountAmount, 0)
+
+  useEffect(() => {
+  async function loadStoreSettings() {
+    const settings = await getStoreSettings()
+    setStoreSettings(settings)
+  }
+
+  loadStoreSettings()
+}, [])
 
   useEffect(() => {
   async function loadRewards() {
@@ -219,7 +229,7 @@ export default function Cart() {
   finalTotal
 })
       openWhatsAppOrder({
-  whatsappNumber: WHATSAPP_NUMBER,
+  whatsappNumber: storeSettings?.whatsapp_number || WHATSAPP_NUMBER,
   message
 })
     }

@@ -31,7 +31,23 @@ export function formatStoreHours(storeHours) {
   }))
 }
 
-export function getStoreStatus(storeHours) {
+export function getStoreStatus(storeHours, settings = null) {
+  if (settings?.force_status === 'open') {
+    return {
+      isOpen: true,
+      message: 'Aberto agora',
+      forced: true
+    }
+  }
+
+  if (settings?.force_status === 'closed') {
+    return {
+      isOpen: false,
+      message: 'Fechado no momento',
+      forced: true
+    }
+  }
+
   const now = new Date()
   const weekday = now.getDay()
 
@@ -46,7 +62,6 @@ export function getStoreStatus(storeHours) {
   }
 
   const currentTime = now.toTimeString().slice(0, 5)
-
   const openTime = today.open_time?.slice(0, 5)
   const closeTime = today.close_time?.slice(0, 5)
 
@@ -58,7 +73,7 @@ export function getStoreStatus(storeHours) {
     isOpen,
     message: isOpen
       ? `Aberto até ${closeTime}`
-      : `Fechado no momento`,
+      : 'Fechado no momento',
     today
   }
 }
